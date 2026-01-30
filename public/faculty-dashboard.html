@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Faculty Dashboard - Club Event System (Glassmorphism + Exact Search)</title>
+
+  <!-- Bootstrap + Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Optional modern fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /*    =
+       GLASSMORPHISM THEME (Faculty)
+          = */
+    :root{
+      --bg-1: linear-gradient(135deg, #07102a 0%, #0b1a3a 40%, #081124 100%);
+      --accent-1: #6EE7B7; /* mint */
+      --accent-2: #8B5CF6; /* violet */
+      --glass-bg: rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.10);
+      --card-radius: 14px;
+      --shadow-strong: 0 18px 50px rgba(2,6,23,0.6);
+      --muted-light: rgba(255,255,255,0.85);
+      --muted-dim: rgba(255,255,255,0.70);
+      --muted-dark: rgba(15,23,42,0.85);
+      --glass-accent: linear-gradient(135deg, rgba(110,231,183,0.08), rgba(139,92,246,0.06));
+    }
+
+    *{ box-sizing: border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color: var(--muted-light);
+      background: var(--bg-1);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
+      padding: 0;
+    }
+
+    .app-wrapper { min-height:100vh; display:flex; flex-direction:row; }
+
+    /*  = SIDEBAR  = */
+    .sidebar {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      backdrop-filter: blur(14px) saturate(120%);
+      -webkit-backdrop-filter: blur(14px) saturate(120%);
+      border-right: 1px solid var(--glass-border);
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      color: var(--muted-light);
+      z-index: 1050;
+      transition: width 0.28s ease, transform 0.28s ease, opacity 0.28s;
+      overflow-y: auto; 
+      overflow-x: hidden;
+      padding-bottom: 48px;
+      width: 260px; 
+      min-height: 100vh;
+    }
+    .sidebar.collapsed { width: 70px; }
+    .sidebar .p-3 { padding-top: 28px; padding-bottom: 8px; }
+
+    .sidebar .sidebar-title {
+      text-align: center; 
+      margin-bottom: 1rem;
+      font-family: "Space Grotesk", Inter, sans-serif; 
+      font-weight: 700; 
+      color: white;
+      letter-spacing: -0.01em; 
+      font-size: 18px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 10px;
+      text-shadow: 0 6px 20px rgba(139,92,246,0.08);
+    }
+
+    .sidebar .nav { padding: 6px; display: flex; flex-direction: column; }
+
+    .sidebar .nav-link {
+      color: rgba(255,255,255,0.85);
+      padding: 12px 16px; 
+      border-radius: 12px; 
+      margin: 6px;
+      transition: transform 210ms cubic-bezier(.2,.9,.3,1), background 210ms, color 210ms, box-shadow 210ms;
+      display: flex; 
+      align-items: center; 
+      white-space: nowrap; 
+      text-decoration: none;
+    }
+    .sidebar .nav-link i { 
+      min-width: 22px; 
+      text-align: center; 
+      font-size: 16px; 
+      filter: drop-shadow(0 4px 12px rgba(139,92,246,0.08)); 
+    }
+    .sidebar .nav-link span { 
+      margin-left: 12px; 
+      font-weight: 600; 
+      transition: opacity 180ms ease; 
+    }
+    .sidebar.collapsed .nav-link span { display: none; }
+    .sidebar.collapsed .sidebar-title { display: none; }
+
+    .sidebar .nav-link:hover { 
+      transform: translateY(-4px); 
+      background: rgba(255,255,255,0.06); 
+      color: white; 
+      box-shadow: 0 8px 24px rgba(2,6,23,0.5); 
+    }
+    .sidebar .nav-link.active { 
+      background: linear-gradient(90deg, rgba(110,231,183,0.08), rgba(139,92,246,0.08)); 
+      color: white; 
+      box-shadow: 0 12px 30px rgba(139,92,246,0.08); 
+    }
+
+    .sidebar-toggle { 
+      background: rgba(255,255,255,0.06); 
+      border: 1px solid rgba(255,255,255,0.06); 
+      color: white; 
+      padding: 8px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      transition: transform 180ms; 
+    }
+    .sidebar-toggle:hover { transform: translateY(-3px); }
+
+    hr { border-color: rgba(255,255,255,0.04); margin: 18px 6px; }
+
+    /*  = MAIN  = */
+    .main-content { 
+      flex: 1; 
+      min-height: 100vh; 
+      padding: 24px; 
+      transition: margin-left 0.28s ease; 
+    }
+
+    #page-title { 
+      font-family: "Space Grotesk", Inter, sans-serif; 
+      color: #ffffff; 
+      font-size: 22px; 
+    }
+    .mobile-toggle { display: none; }
+
+    .badge-custom {
+      background: linear-gradient(90deg, rgba(110,231,183,0.16), rgba(139,92,246,0.14));
+      color: white; 
+      border-radius: 10px; 
+      padding: 6px 10px; 
+      font-weight: 700; 
+      box-shadow: 0 8px 24px rgba(139,92,246,0.06);
+    }
+
+    /*  = CARDS  = */
+    .card { 
+      border: 1px solid rgba(255,255,255,0.06); 
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); 
+      backdrop-filter: blur(8px) saturate(120%); 
+      -webkit-backdrop-filter: blur(8px) saturate(120%); 
+      border-radius: var(--card-radius); 
+      box-shadow: 0 6px 20px rgba(2,6,23,0.50); 
+      transition: transform 220ms, box-shadow 220ms; 
+    }
+    .card:hover { transform: translateY(-6px); box-shadow: var(--shadow-strong); }
+    .card .card-header { 
+      background: transparent; 
+      border-bottom: none; 
+      color: var(--muted-light); 
+      font-weight: 700; 
+      display:flex; 
+      align-items:center; 
+      gap:8px; 
+      font-family: "Space Grotesk", Inter, sans-serif; 
+    }
+    .card .card-body { color: rgba(255,255,255,0.92); }
+
+    .event-card { border-left: 4px solid rgba(110,231,183,0.28); }
+    .certificate-card { border-left: 4px solid rgba(40,167,69,0.22); }
+
+    .stats-card { 
+      background: linear-gradient(135deg, rgba(110,231,183,0.08), rgba(139,92,246,0.06)); 
+      color: white; 
+      border: 1px solid rgba(255,255,255,0.06); 
+    }
+    .stats-card i { filter: drop-shadow(0 6px 18px rgba(139,92,246,0.08)); }
+
+    /*  = SEARCH (Header + Events scope)  = */
+    .search-area { 
+      display:flex; 
+      align-items:center; 
+      gap:12px; 
+      flex-wrap:wrap; 
+      margin-bottom:16px; 
+      justify-content:center; 
+      width:100%; 
+    }
+    .search-box { position:relative; width:100%; max-width:640px; }
+    .search-box input {
+      width:100%; 
+      padding: 12px 14px 12px 44px; 
+      border-radius: 999px; 
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02); 
+      color: rgba(255,255,255,0.95); 
+      transition: box-shadow 150ms, transform 150ms;
+    }
+    .search-box input:focus { 
+      box-shadow: 0 10px 30px rgba(139,92,246,0.06); 
+      outline: none; 
+      transform: translateY(-1px); 
+    }
+    .search-box .search-icon { 
+      position:absolute; 
+      left:12px; 
+      top:50%; 
+      transform:translateY(-50%); 
+      pointer-events:none; 
+      color: rgba(255,255,255,0.65); 
+      font-size: 16px; 
+    }
+    .search-box .clear-icon { 
+      position:absolute; 
+      right:12px; 
+      top:50%; 
+      transform:translateY(-50%); 
+      color: rgba(255,255,255,0.55); 
+      cursor:pointer; 
+      display:none; 
+    }
+    .search-box.has-value .clear-icon { display:block; }
+
+    /* Suggestions dropdown */
+    .search-suggestions { 
+      position: absolute; 
+      top: calc(100% + 10px); 
+      left: 0; 
+      width: 100%; 
+      z-index: 9999; 
+      max-height: 320px; 
+      overflow-y: auto; 
+      border-radius: 10px; 
+      border: 1px solid rgba(255,255,255,0.10); 
+      background: rgba(6,12,28,0.96); 
+      backdrop-filter: blur(6px); 
+      -webkit-backdrop-filter: blur(6px); 
+      box-shadow: 0 14px 40px rgba(2,6,23,0.85); 
+      padding: 8px 6px; 
+      box-sizing: border-box; 
+    }
+    @media (max-width: 991px) {
+      .search-box .search-suggestions { 
+        position: fixed; 
+        left: 16px; 
+        right: 16px; 
+        top: auto; 
+        bottom: 16px; 
+        width: auto; 
+        max-height: 45vh; 
+        margin: 0; 
+        border-radius: 12px; 
+      }
+    }
+    .search-suggestion-item { 
+      display: flex; 
+      gap: 12px; 
+      align-items: flex-start; 
+      padding: 12px; 
+      cursor: pointer; 
+      border-radius: 8px; 
+      color: rgba(255,255,255,0.95); 
+      background: transparent; 
+      transition: background 150ms ease, transform 120ms ease; 
+    }
+    .search-suggestion-item + .search-suggestion-item { margin-top: 6px; }
+    .search-suggestion-item:hover { 
+      background: rgba(255,255,255,0.04); 
+      transform: translateY(-2px); 
+    }
+    .search-suggestion-item .title { font-weight: 700; color: #fff; }
+    .search-suggestion-item .meta { 
+      color: rgba(255,255,255,0.7); 
+      font-size: 13px; 
+    }
+    .search-suggestions ::-webkit-scrollbar { height: 8px; width: 8px; }
+    .search-suggestions ::-webkit-scrollbar-thumb { 
+      background: rgba(255,255,255,0.06); 
+      border-radius: 8px; 
+    }
+
+    /* EVENTS-section inline search placeholder (if you want to add later) */
+    .search-box--compact { max-width: 360px; }
+
+    /*  = TABLES / FORMS  = */
+    table.table tbody tr td, 
+    table.table thead th {
+      color: rgba(255, 255, 255, 0.95) !important;
+      background-color: rgba(0, 0, 0, 0.25);
+    }
+
+    table.table tbody tr:hover td {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .card-body {
+      color: rgba(255, 255, 255, 0.95) !important;
+    }
+
+    .form-control, .form-select { 
+      background: rgba(255,255,255,0.02); 
+      border: 1px solid rgba(255,255,255,0.06); 
+      color: rgba(255,255,255,0.95); 
+      border-radius: 8px; 
+      padding: 10px 12px; 
+      transition: box-shadow 120ms, border-color 120ms; 
+    }
+    .form-control:focus, .form-select:focus { 
+      outline: none; 
+      box-shadow: 0 8px 30px rgba(139,92,246,0.06); 
+      border-color: rgba(139,92,246,0.45); 
+    }
+    label.form-label { 
+      color: rgba(255,255,255,0.85); 
+      font-weight:600; 
+    }
+
+    /* Promote Student modal: glass style */
+    #promoteStudentModal .modal-content {
+      background: var(--glass-bg) !important;
+      border: 1px solid var(--glass-border) !important;
+      color: var(--muted-light) !important;
+      backdrop-filter: blur(10px) saturate(120%);
+      -webkit-backdrop-filter: blur(10px) saturate(120%);
+      border-radius: 12px;
+    }
+    #promoteStudentModal .form-control,
+    #promoteStudentModal .form-select {
+      background: rgba(8,18,36,0.55) !important;
+      color: rgba(255,255,255,0.95) !important;
+      border: 1px solid rgba(255,255,255,0.06) !important;
+    }
+    #promoteStudentModal .form-control:focus,
+    #promoteStudentModal .form-select:focus {
+      box-shadow: 0 8px 30px rgba(139,92,246,0.06) !important;
+      border-color: rgba(139,92,246,0.45) !important;
+      outline: none !important;
+    }
+    #promoteStudentModal label.form-label { 
+      color: rgba(255,255,255,0.85) !important; 
+    }
+
+    .btn-custom { 
+      background: linear-gradient(90deg, rgba(110,231,183,0.18), rgba(139,92,246,0.16)); 
+      border: 1px solid rgba(255,255,255,0.08); 
+      color: white; 
+      padding: 8px 18px; 
+      border-radius: 10px; 
+      font-weight: 700; 
+      transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms; 
+      box-shadow: 0 8px 22px rgba(139,92,246,0.06); 
+    }
+    .btn-custom:hover { 
+      transform: translateY(-3px); 
+      box-shadow: 0 22px 60px rgba(139,92,246,0.10); 
+      opacity: 0.98; 
+      color: white; 
+    }
+    .btn-custom:active { transform: translateY(0); }
+
+    .btn-outline-warning { 
+      color: rgba(255,255,255,0.95); 
+      border-color: rgba(255,255,255,0.06); 
+      background: transparent; 
+    }
+    .btn-outline-warning:hover { 
+      background: rgba(255,255,255,0.03); 
+      color: white; 
+    }
+
+    .progress { 
+      height: 10px; 
+      background: rgba(255,255,255,0.04); 
+      border-radius: 10px; 
+      overflow: hidden; 
+      border: 1px solid rgba(255,255,255,0.03); 
+    }
+    .progress .progress-bar { 
+      background: linear-gradient(90deg, rgba(110,231,183,0.9), rgba(139,92,246,0.9)); 
+      box-shadow: 0 6px 18px rgba(139,92,246,0.06) inset; 
+    }
+    .progress-bar.bg-success { 
+      background: linear-gradient(90deg, rgba(110,231,183,0.9), rgba(88,180,140,0.9)); 
+    }
+
+    .mobile-overlay { 
+      display: none; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      right: 0; 
+      bottom: 0; 
+      background: rgba(2,6,23,0.6); 
+      z-index: 999; 
+      transition: opacity 180ms; 
+    }
+    .mobile-overlay.active { display:block; }
+
+    a.nav-link:focus, button:focus, input:focus { 
+      outline: 2px dashed rgba(110,231,183,0.22); 
+      outline-offset: 3px; 
+    }
+
+    .badge-gold { background: linear-gradient(90deg,#FFD700,#F9D342); color:#000; }
+    .badge-silver { background: linear-gradient(90deg,#C0C0C0,#E0E0E0); color:#000; }
+    .badge-bronze { background: linear-gradient(90deg,#CD7F32,#D9A174); color:#000; }
+
+    /* TEXT COLOR hardening */
+    body, .sidebar, .card, h1,h2,h3,h4,h5,h6, p, span, label, a, td, th, .nav-link, .badge-custom { 
+      color: #ffffff !important; 
+    }
+    p, span, .text-muted { 
+      color: rgba(255,255,255,0.84) !important; 
+    }
+    small { 
+      color: rgba(255,255,255,0.78) !important; 
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 991px) {
+      .sidebar{ 
+        position: fixed; 
+        left: 0; 
+        top: 0; 
+        bottom: 0; 
+        transform: translateX(-110%); 
+        width: 86%; 
+        max-width: 360px; 
+        transition: transform 240ms ease; 
+        z-index: 1080; 
+      }
+      .sidebar.mobile-open { transform: translateX(0); }
+      .sidebar.collapsed { transform: translateX(-110%); }
+      .main-content { padding: 16px; }
+      .mobile-toggle { display: inline-flex; }
+      body { padding: 0; }
+      .sidebar .sidebar-title { font-size: 16px; }
+      .sidebar .nav-link span { display: inline-block; }
+      .card { margin-bottom: 14px; }
+      .table-responsive { font-size: 0.95rem; }
+      .btn-custom { width: 100%; }
+      .mobile-only-hidden { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Mobile Overlay -->
+  <div id="mobileOverlay" class="mobile-overlay" onclick="toggleMobileSidebar()"></div>
+
+  <div class="app-wrapper">
+    <!--  = SIDEBAR  = -->
+    <aside id="sidebar" class="sidebar" aria-label="Faculty sidebar">
+      <div class="p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="sidebar-title mb-0">
+            <i class="fas fa-chalkboard-teacher me-2"></i>
+            Faculty Portal
+          </h4>
+          <button id="collapseBtn" class="sidebar-toggle d-none d-lg-inline-flex" aria-label="Toggle sidebar" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+          </button>
+          <button class="sidebar-toggle d-inline-flex d-lg-none" onclick="toggleMobileSidebar()" aria-label="Close sidebar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <nav class="nav flex-column" aria-label="Primary">
+          <a class="nav-link active" href="#dashboard" onclick="showSection(event, 'dashboard')">
+            <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
+          </a>
+          <a class="nav-link" href="#events" onclick="showSection(event, 'events')">
+            <i class="fas fa-calendar-alt"></i><span>All Events</span>
+          </a>
+          <a class="nav-link" href="#past-events" onclick="showSection(event, 'past-events')">
+            <i class="fas fa-history"></i><span>Past Events</span>
+          </a>
+          <a class="nav-link" href="#create-event" onclick="showSection(event, 'create-event')">
+            <i class="fas fa-plus-circle"></i><span>Create Event</span>
+          </a>
+          <!-- NEW: Filters & Reports in between Create Event and Event Participants -->
+          <a class="nav-link" href="#filters" onclick="showSection(event, 'filters')">
+            <i class="fas fa-filter"></i><span>Filters & Reports</span>
+          </a>
+          <a class="nav-link" href="#participants" onclick="showSection(event, 'participants')">
+            <i class="fas fa-users"></i><span>Event Participants</span>
+          </a>
+          <a class="nav-link" href="#leaderboard" onclick="showSection(event, 'leaderboard')">
+            <i class="fas fa-trophy"></i><span>Leaderboard</span>
+          </a>
+          <a class="nav-link" href="#students" onclick="showSection(event, 'students')">
+            <i class="fas fa-user-graduate"></i><span>Students</span>
+          </a>
+          <a class="nav-link" href="#manage-admins" onclick="showSection(event, 'manage-admins')">
+            <i class="fas fa-user-cog"></i><span>Manage Admins</span>
+          </a>
+          <a class="nav-link" href="#profile" onclick="showSection(event, 'profile')">
+            <i class="fas fa-user"></i><span>Profile</span>
+          </a>
+          <hr class="my-3">
+          <a class="nav-link" href="faculty-login.html" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+    <!--  = MAIN  = -->
+    <main id="mainContent" class="main-content" role="main" aria-live="polite">
+      <div class="container-fluid p-0 p-lg-2">
+        <!-- HEADER: left title, center search, right badge -->
+        <div class="row align-items-center mb-4 gx-3">
+          <div class="col-12 col-lg-4 d-flex align-items-center mb-2 mb-lg-0">
+            <button class="mobile-toggle btn btn-custom me-3 d-inline-flex d-lg-none" onclick="toggleMobileSidebar()" aria-label="Open sidebar">
+              <i class="fas fa-bars"></i>
+            </button>
+            <h2 id="page-title" class="mb-0">Dashboard</h2>
+          </div>
+
+          <div class="col-12 col-lg-4 d-flex justify-content-center">
+            <!-- CENTER SEARCH -->
+            <div class="search-area w-100">
+              <div class="search-box" id="searchBox" role="search" aria-label="Search events">
+                <span class="search-icon"><i class="fas fa-search"></i></span>
+                <input id="searchInput" type="search" placeholder="Search workshops or events..." aria-label="Search events" autocomplete="off">
+                <span class="clear-icon" id="clearSearch" title="Clear search"><i class="fas fa-times"></i></span>
+                <div id="searchSuggestions" class="search-suggestions" style="display:none;" role="listbox" aria-label="Search suggestions"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4 d-flex justify-content-lg-end align-items-center">
+            <span class="me-3 d-none d-md-block">Welcome, <span id="user-name">Faculty</span></span>
+            <div class="badge badge-custom fs-6" aria-live="polite">Faculty</div>
+          </div>
+        </div>
+
+        <!-- DASHBOARD SECTION -->
+        <section id="dashboard-section" class="content-section">
+          <div class="row mb-4">
+            <div class="col-md-3">
+              <div class="card stats-card">
+                <div class="card-body text-center">
+                  <i class="fas fa-calendar-alt fa-2x mb-2"></i>
+                  <h5 id="total-events">0</h5>
+                  <p class="mb-0">Total Events</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stats-card">
+                <div class="card-body text-center">
+                  <i class="fas fa-user-graduate fa-2x mb-2"></i>
+                  <h5 id="total-students">0</h5>
+                  <p class="mb-0">Total Students</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stats-card">
+                <div class="card-body text-center">
+                  <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                  <h5 id="upcoming-events">0</h5>
+                  <p class="mb-0">Upcoming Events</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stats-card">
+                <div class="card-body text-center">
+                  <i class="fas fa-user-shield fa-2x mb-2"></i>
+                  <h5 id="total-admins">0</h5>
+                  <p class="mb-0">Total Admins</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row gx-3">
+            <div class="col-lg-8">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Recent Events</h5>
+                </div>
+                <div class="card-body">
+                  <div id="recent-events">
+                    <div class="text-center">
+                      <div class="spinner-border text-warning" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-4">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                      <span>Completed Events</span>
+                      <span id="completed-events">0</span>
+                    </div>
+                    <div class="progress mt-1">
+                      <div class="progress-bar" role="progressbar" style="width: 0%" id="completed-progress"></div>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                      <span>Active Students</span>
+                      <span id="active-students">0</span>
+                    </div>
+                    <div class="progress mt-1">
+                      <div class="progress-bar bg-success" role="progressbar" style="width: 0%" id="active-progress"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- EVENTS (ALL) SECTION -->
+        <section id="events-section" class="content-section" style="display:none;">
+          <div class="card">
+            <div class="card-header d-flex flex-wrap gap-2 align-items-center justify-content-between">
+              <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>All Events</h5>
+              <!-- (Optional inline search can be added here if needed) -->
+            </div>
+            <div class="card-body">
+              <div id="all-events">
+                <div class="text-center">
+                  <div class="spinner-border text-warning" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- MY EVENTS (IF YOU WANT SEPARATE "My Events" VIEW) -->
+        <section id="my-events-section" class="content-section" style="display:none;">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>My Events</h5>
+              <button class="btn btn-custom" onclick="navigateToSection('create-event')">
+                <i class="fas fa-plus me-2"></i>Create Event
+              </button>
+            </div>
+            <div class="card-body">
+              <div id="my-events">
+                <div class="text-center">
+                  <div class="spinner-border text-warning" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CREATE EVENT SECTION -->
+        <section id="create-event-section" class="content-section" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Create New Event</h5>
+            </div>
+            <div class="card-body">
+              <form id="create-event-form">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="event-title" class="form-label">Event Title</label>
+                      <input type="text" class="form-control" id="event-title" name="title" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="event-venue" class="form-label">Venue</label>
+                      <input type="text" class="form-control" id="event-venue" name="venue" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="event-date" class="form-label">Date</label>
+                      <input type="date" class="form-control" id="event-date" name="date" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="event-time" class="form-label">Time</label>
+                      <input type="time" class="form-control" id="event-time" name="time" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="event-max-participants" class="form-label">Max Participants</label>
+                      <input type="number" class="form-control" id="event-max-participants" name="maxParticipants" value="100">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="event-points" class="form-label">Points</label>
+                      <input type="number" class="form-control" id="event-points" name="points" value="10">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="event-club" class="form-label">Select Club</label>
+                      <select class="form-control" id="event-club" name="club" required onchange="updateClubName(this)">
+                        <option value="">Choose a club...</option>
+                      </select>
+                      <input type="hidden" id="event-club-name" name="clubName">
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="mb-3">
+                      <label for="event-description" class="form-label">Description</label>
+                      <textarea class="form-control" id="event-description" name="description" rows="4" required></textarea>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex gap-2">
+                  <button type="submit" class="btn btn-custom">
+                    <i class="fas fa-save me-2"></i>Create Event
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary" onclick="showSection(event, 'events')">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- FILTERS & REPORTS SECTION (NEW) -->
+        <section id="filters-section" class="content-section" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filters & Reports</h5>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <h6 class="mb-2"><i class="fas fa-users me-2"></i>Filter by Club</h6>
+                  <select class="form-control" id="filter-club" onchange="applyFilters()">
+                    <option value="">Select a club...</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="mb-2"><i class="fas fa-building me-2"></i>Filter by Department</h6>
+                  <select class="form-control" id="filter-department" onchange="applyFilters()">
+                    <option value="">Select a department...</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="mb-2"><i class="fas fa-calendar-alt me-2"></i>Filter by Year</h6>
+                  <select class="form-control" id="filter-year" onchange="applyFilters()">
+                    <option value="">Select year...</option>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="mb-2"><i class="fas fa-calendar me-2"></i>Filter by Month</h6>
+                  <select class="form-control" id="filter-month" onchange="updateWeekOptions(); applyFilters()">
+                    <option value="">Select a month...</option>
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="mb-2"><i class="fas fa-calendar-week me-2"></i>Filter by Week</h6>
+                  <select class="form-control" id="filter-week" onchange="applyFilters()">
+                    <option value="">Select a week...</option>
+                    <option value="1">1st Week</option>
+                    <option value="2">2nd Week</option>
+                    <option value="3">3rd Week</option>
+                    <option value="4">4th Week</option>
+                    <option value="5">5th Week</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <button class="btn btn-custom mt-4" onclick="applyFilters()">
+                    <i class="fas fa-search me-2"></i>Apply Filters
+                  </button>
+                  <button class="btn btn-outline-secondary mt-4 ms-2" onclick="clearFilters()">
+                    <i class="fas fa-times me-2"></i>Clear
+                  </button>
+                  <div class="col-md-6 text-md-end">
+                  <button class="btn btn-outline-warning" onclick="exportParticipantsCSV()">
+                    <i class="fa-solid fa-file-csv me-2"></i>Export CSV
+                  </button>
+                </div>
+                </div>
+              </div>
+              <hr class="my-3">
+              <div id="filter-output" class="mt-2">
+                <p class="text-muted text-center">
+                  <i class="fas fa-info-circle me-2"></i>
+                  Select filters to view student participation details
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PARTICIPANTS SECTION -->
+        <section id="participants-section" class="content-section" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="fas fa-users me-2"></i>Event Participants</h5>
+            </div>
+            <div class="card-body">
+              <div class="row g-3 align-items-end">
+                <div class="col-md-6">
+                  <label for="event-select" class="form-label">Select Event</label>
+                  <select class="form-control" id="event-select" onchange="loadEventParticipants()">
+                    <option value="">Choose an event...</option>
+                  </select>
+                </div>
+                <div class="col-md-6 text-md-end">
+                  <button class="btn btn-outline-warning" onclick="exportParticipantsCSV()">
+                    <i class="fa-solid fa-file-csv me-2"></i>Export CSV
+                  </button>
+                </div>
+              </div>
+              <div id="participants-list" class="mt-3">
+                <div class="text-center text-muted">
+                  <i class="fas fa-info-circle me-2"></i>Select an event to view participants
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PAST EVENTS SECTION -->
+        <section id="past-events-section" class="content-section" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="fas fa-history me-2"></i>Past Events & Winners</h5>
+            </div>
+            <div class="card-body">
+              <div id="past-events">
+                <div class="text-center">
+                  <div class="spinner-border text-warning" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STUDENT PROGRESS SECTION -->
+        <section id="student-progress-section" class="content-section" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Event Participants</h5>
+            </div>
+            <div class="card-body">
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <label for="event-select-participants" class="form-label"><i class="fas fa-calendar-alt me-2"></i>Select Event to View Participants</label>
+                  <select class="form-control" id="event-select-participants" onchange="loadParticipantsForEvent()">
+                    <option value="">-- Select an event --</option>
+                  </select>
+                </div>
+              </div>
+              <div id="student-progress">
+                <div class="text-center text-muted">
+                  <i class="fas fa-info-circle me-2"></i>Select an event to view participants
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- LEADERBOARD SECTION -->
+        <section id="leaderboard-section" class="content-section" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Student Leaderboard</h5>
+            </div>
+            <div class="card-body">
+              <div id="leaderboard">
+                <div class="text-center">
+                  <div class="spinner-border text-warning" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STUDENTS SECTION -->
+        <section id="students-section" class="content-section" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="fas fa-user-graduate me-2"></i>All Students</h5>
+            </div>
+            <div class="card-body">
+              <div id="students-list">
+                <div class="text-center">
+                  <div class="spinner-border text-warning" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- MANAGE ADMINS SECTION -->
+        <section id="manage-admins-section" class="content-section" style="display:none;">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0"><i class="fas fa-user-cog me-2"></i>Manage Admin Accounts</h5>
+              <button class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#promoteStudentModal">
+                <i class="fas fa-user-plus me-2"></i>Promote Student to Admin
+              </button>
+            </div>
+            <div class="card-body">
+              <div id="admins-list">
+                <div class="text-center">
+                  <div class="spinner-border text-warning" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PROFILE SECTION -->
+        <section id="profile-section" class="content-section" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="fas fa-user me-2"></i>My Profile</h5>
+            </div>
+            <div class="card-body">
+              <form id="profile-form">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="profile-name" class="form-label">Faculty Name</label>
+                      <input type="text" class="form-control" id="profile-name" name="name">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="profile-email" class="form-label">Email</label>
+                      <input type="email" class="form-control" id="profile-email" name="email" readonly>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="profile-phone" class="form-label">Phone</label>
+                      <input type="tel" class="form-control" id="profile-phone" name="phone">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="profile-club" class="form-label">Club</label>
+                      <input type="text" class="form-control" id="profile-club" name="club">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="profile-department" class="form-label">Department</label>
+                      <input type="text" class="form-control" id="profile-department" name="department">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="profile-faculty-id" class="form-label">Faculty ID</label>
+                      <input type="text" class="form-control" id="profile-faculty-id" name="facultyId" readonly>
+                    </div>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-custom">
+                  <i class="fas fa-save me-2"></i>Update Profile
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <div class="mt-4 text-center text-muted small">© Club Event System</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Promote Student Modal -->
+  <div class="modal fade" id="promoteStudentModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Promote Student to Admin</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="promote-student-form">
+            <div class="mb-3">
+              <label for="student-select" class="form-label">Select Student</label>
+              <select class="form-select" id="student-select" required>
+                <option value="">Choose a student...</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="club-name" class="form-label">Club Name</label>
+              <select class="form-select" id="club-name" name="clubName" required>
+                <option value="">Choose a club...</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-custom" onclick="promoteStudent()">Promote to Admin</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+/*   GLOBAL UI STATE   */
+const mobileOverlay = document.getElementById('mobileOverlay');
+
+/*   SIDEBAR / MOBILE   */
+function toggleSidebar(){
+  const sidebar = document.getElementById('sidebar'); 
+  if (!sidebar) return; 
+  sidebar.classList.toggle('collapsed'); 
+}
+
+function toggleMobileSidebar(){
+  const sidebar = document.getElementById('sidebar'); 
+  if (!sidebar || !mobileOverlay) return; 
+  sidebar.classList.toggle('mobile-open'); 
+  mobileOverlay.classList.toggle('active'); 
+}
+
+/*   SECTION NAVIGATION (UI ROUTER)   */
+function showSection(event, section) {
+  if (event && typeof event.preventDefault === 'function') event.preventDefault();
+
+  document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+
+  const sectionEl = document.getElementById(`${section}-section`); 
+  if (sectionEl) sectionEl.style.display = 'block';
+
+  let link = null; 
+  if (event && event.currentTarget) link = event.currentTarget.closest('.nav-link');
+  if (!link) link = document.querySelector(`.nav-link[href="#${section}"]`);
+  if (link) link.classList.add('active');
+
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar && sidebar.classList.contains('mobile-open')){
+    sidebar.classList.remove('mobile-open'); 
+    if (mobileOverlay) mobileOverlay.classList.remove('active'); 
+  }
+
+  const titles = { 
+    'dashboard':'Dashboard',
+    'events':'All Events',
+    'create-event':'Create Event',
+    'filters':'Filters & Reports',
+    'participants':'Event Participants',
+    'past-events':'Past Events',
+    'student-progress':'Student Progress',
+    'leaderboard':'Leaderboard',
+    'students':'Students',
+    'manage-admins':'Manage Admins',
+    'profile':'Profile' 
+  };
+  const pageTitleEl = document.getElementById('page-title'); 
+  if (pageTitleEl) pageTitleEl.textContent = titles[section] || 'Dashboard';
+}
+
+function navigateToSection(section){
+  document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+
+  const el = document.getElementById(`${section}-section`); 
+  if (el) el.style.display = 'block';
+
+  const navLink = document.querySelector(`.nav-link[href="#${section}"]`); 
+  if (navLink) navLink.classList.add('active');
+}
+
+/*   UI HELPERS   */
+function updateClubName(selectEl){ 
+  try{ 
+    const hidden = document.getElementById('event-club-name'); 
+    if (!hidden) return; 
+    const opt = selectEl.options[selectEl.selectedIndex]; 
+    hidden.value = opt ? opt.textContent.trim() : ''; 
+  }catch(e){ 
+    console.error('updateClubName error', e); 
+  } 
+}
+
+function formatDate(d){ 
+  try{ 
+    if (!d) return '-'; 
+    const date = new Date(d); 
+    return date.toLocaleDateString(); 
+  }catch(e){ 
+    return d; 
+  } 
+}
+
+function truncateText(s,n){ 
+  if (!s) return ''; 
+  return s.length > n ? s.slice(0,n-1) + '…' : s; 
+}
+
+function escapeHtml(unsafe){ 
+  if (unsafe===null || unsafe===undefined) return ''; 
+  return String(unsafe)
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'",'&#039;'); 
+}
+
+function escapeAttr(unsafe){ 
+  if (unsafe===null || unsafe===undefined) return '#'; 
+  return String(unsafe)
+    .replaceAll('"','%22')
+    .replaceAll("'",'%27'); 
+}
+
+/*   SEARCH UI LOGIC (NO API)   */
+let currentSearchQuery = '';
+
+function matchesSearch(item, q){ 
+  if (!q) return true; 
+  try{ 
+    q = q.trim().toLowerCase(); 
+    const hay = [ 
+      item.title||'', 
+      item.description||'', 
+      item.venue||'', 
+      item.time||'', 
+      (item.tags||[]).join(' ') 
+    ].join(' ').toLowerCase(); 
+    return hay.indexOf(q) !== -1; 
+  }catch(e){ 
+    return false; 
+  } 
+}
+
+/*   BASIC SEARCH UI   */
+function clearSearchSuggestions(){ 
+  const s = document.getElementById('searchSuggestions'); 
+  if (s){ 
+    s.style.display='none'; 
+    s.innerHTML=''; 
+  } 
+}
+
+function setupSearchUI(){
+  const input = document.getElementById('searchInput');
+  const clearBtn = document.getElementById('clearSearch');
+  const searchBox = document.getElementById('searchBox');
+
+  function debounce(fn, wait){ 
+    let t=null; 
+    return function(...args){ 
+      clearTimeout(t); 
+      t = setTimeout(()=>fn.apply(this,args), wait); 
+    }; 
+  }
+
+  const onSearchChange = debounce((val)=>{
+    currentSearchQuery = (val || '').trim();
+    if (searchBox){ 
+      if (currentSearchQuery) searchBox.classList.add('has-value'); 
+      else searchBox.classList.remove('has-value'); 
+    }
+  }, 250);
+
+  if (input){
+    input.addEventListener('input', (e)=> onSearchChange(e.target.value));
+    input.addEventListener('blur', ()=>{ 
+      setTimeout(()=> clearSearchSuggestions(), 180); 
+    });
+  }
+
+  if (clearBtn){
+    clearBtn.addEventListener('click', ()=>{
+      if (input){ 
+        input.value=''; 
+        input.dispatchEvent(new Event('input')); 
+      }
+      currentSearchQuery = '';
+      clearSearchSuggestions();
+    });
+  }
+
+  document.addEventListener('click', (e)=>{ 
+    const box = document.getElementById('searchBox'); 
+    if (box && !box.contains(e.target)) clearSearchSuggestions(); 
+  });
+}
+
+// Load events for participants dropdown
+function loadEventsForParticipantsDropdown() {
+  fetch('/api/faculty/all_events')
+    .then(response => response.json())
+    .then(data => {
+      console.log('Events loaded for participants:', data);
+      populateParticipantsEventDropdown(data.events || []);
+    })
+    .catch(error => {
+      console.error('Error loading events:', error);
+    });
+}
+
+// Populate events dropdown
+function populateParticipantsEventDropdown(events) {
+  const eventSelect = document.getElementById('event-select-participants');
+  if (!eventSelect) return;
+  
+  // Clear existing options except first one
+  while (eventSelect.options.length > 1) {
+    eventSelect.remove(1);
+  }
+  
+  // Add events from database
+  if (events && events.length > 0) {
+    events.forEach(event => {
+      const option = document.createElement('option');
+      option.value = event._id || '';
+      option.textContent = (event.title || 'Unknown Event') + (event.status ? ` (${event.status})` : '');
+      eventSelect.appendChild(option);
+    });
+  }
+}
+
+// Load participants for selected event
+function loadParticipantsForEvent() {
+  const eventSelect = document.getElementById('event-select-participants');
+  if (!eventSelect || !eventSelect.value) {
+    document.getElementById('student-progress').innerHTML = '<div class="text-center text-muted"><i class="fas fa-info-circle me-2"></i>Select an event to view participants</div>';
+    return;
+  }
+  
+  const eventId = eventSelect.value;
+  const progressContainer = document.getElementById('student-progress');
+  
+  // Show loading
+  progressContainer.innerHTML = '<div class="text-center"><div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+  
+  fetch(`/api/faculty/event_participants?event_id=${eventId}`)
+    .then(response => response.json())
+    .then(data => {
+      console.log('Event participants loaded:', data);
+      displayEventParticipants(data.participants, data.event_title, data.count);
+    })
+    .catch(error => {
+      console.error('Error loading participants:', error);
+      progressContainer.innerHTML = '<p class="text-danger text-center">Failed to load participants</p>';
+    });
+}
+
+// Display participants in table format
+function displayEventParticipants(participants, eventTitle, totalCount) {
+  const container = document.getElementById('student-progress');
+  
+  if (!participants || participants.length === 0) {
+    container.innerHTML = '<p class="text-muted text-center">No participants registered for this event</p>';
+    return;
+  }
+  
+  let html = `
+    <div class="mb-3">
+      <h6 class="text-muted">
+        <i class="fas fa-users me-2" style="color: #6EE7B7;"></i>
+        ${escapeHtml(eventTitle)} - <strong>${totalCount}</strong> Participants
+      </h6>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover" style="color: inherit;">
+        <thead>
+          <tr style="border-bottom: 2px solid rgba(110, 231, 183, 0.3);">
+            <th style="color: #6EE7B7;"><i class="fas fa-user me-2"></i>Name</th>
+            <th style="color: #6EE7B7;"><i class="fas fa-envelope me-2"></i>Email</th>
+            <th style="color: #6EE7B7;"><i class="fas fa-id-card me-2"></i>Roll Number</th>
+            <th style="color: #6EE7B7;"><i class="fas fa-building me-2"></i>Department</th>
+            <th style="color: #6EE7B7;"><i class="fas fa-book me-2"></i>Year</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+  
+  participants.forEach((participant, index) => {
+    const rowBg = index % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
+    html += `
+      <tr style="background: ${rowBg}; border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <td>
+          <strong>${escapeHtml(participant.name || 'N/A')}</strong>
+        </td>
+        <td>
+          <small>${escapeHtml(participant.email || 'N/A')}</small>
+        </td>
+        <td>
+          <span style="color: #6EE7B7; font-weight: 600;">${escapeHtml(participant.user_roll || 'N/A')}</span>
+        </td>
+        <td>
+          ${escapeHtml(participant.dept || 'N/A')}
+        </td>
+        <td>
+          <span class="badge bg-info">${escapeHtml(participant.year || 'N/A')}</span>
+        </td>
+      </tr>
+    `;
+  });
+  
+  html += `
+        </tbody>
+      </table>
+    </div>
+  `;
+  
+  container.innerHTML = html;
+}
+
+/*   INIT UI   */
+window.addEventListener('load', function() {
+  setupSearchUI();
+  showSection(null, 'dashboard');
+  
+  // Load events for participants dropdown
+  loadEventsForParticipantsDropdown();
+  
+  // Load clubs and populate dropdown
+  loadClubsForDropdown();
+  
+  // Load all events for faculty
+  loadAllEventsForFaculty();
+  
+  // Load recent upcoming events for dashboard
+  loadRecentUpcomingEvents();
+  
+  // Load past events
+  loadPastEvents();
+  
+  // Setup create event form submission
+  const createEventForm = document.getElementById('create-event-form');
+  if (createEventForm) {
+    createEventForm.addEventListener('submit', handleCreateEvent);
+  }
+});
+
+// Load all events from backend for faculty
+function loadAllEventsForFaculty() {
+  const allEventsContainer = document.getElementById('all-events');
+  
+  fetch('/api/faculty/all_events')
+    .then(response => response.json())
+    .then(data => {
+      console.log('All events loaded:', data);
+      displayAllEventsForFaculty(data.events);
+      
+      // Update event stats
+      const totalEventsEl = document.getElementById('total-events');
+      if (totalEventsEl) totalEventsEl.textContent = data.count;
+      
+      const upcomingCount = (data.events || []).filter(e => e.status === 'upcoming').length;
+      const upcomingEl = document.getElementById('upcoming-events');
+      if (upcomingEl) upcomingEl.textContent = upcomingCount;
+      
+      const completedCount = (data.events || []).filter(e => e.status === 'past').length;
+      const completedEl = document.getElementById('completed-events');
+      if (completedEl) completedEl.textContent = completedCount;
+    })
+    .catch(error => {
+      console.error('Error loading all events:', error);
+      if (allEventsContainer) {
+        allEventsContainer.innerHTML = '<p class="text-danger text-center">Failed to load events</p>';
+      }
+    });
+}
+
+// Load recent upcoming events for dashboard
+function loadRecentUpcomingEvents() {
+  const recentEventsContainer = document.getElementById('recent-events');
+  
+  fetch('/api/faculty/events-dashboard')
+    .then(response => response.json())
+    .then(data => {
+      console.log('Recent upcoming events loaded:', data);
+      displayRecentEvents(data.events);
+    })
+    .catch(error => {
+      console.error('Error loading recent events:', error);
+      if (recentEventsContainer) {
+        recentEventsContainer.innerHTML = '<p class="text-danger text-center">Failed to load recent events</p>';
+      }
+    });
+}
+
+// Display recent upcoming events in list format
+function displayRecentEvents(events) {
+  const container = document.getElementById('recent-events');
+  
+  if (!container) return;
+  
+  if (!events || events.length === 0) {
+    container.innerHTML = '<p class="text-muted text-center">No upcoming events</p>';
+    return;
+  }
+  
+  // Sort by date and get first 5
+  const sortedEvents = events.sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 5);
+  
+  let html = '<div class="list-group list-group-flush">';
+  
+  sortedEvents.forEach((event, index) => {
+    const eventId = event._id || event.event_id;
+    const participantsCount = event.registered_users ? event.registered_users.length : event.current_participants || 0;
+    const maxParticipants = event.max_participants || 'Unlimited';
+    const dateObj = new Date(event.date);
+    const daysUntil = Math.ceil((dateObj - new Date()) / (1000 * 60 * 60 * 24));
+    const dateLabel = daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : `in ${daysUntil} days`;
+    
+    html += `
+      <div class="list-group-item d-flex justify-content-between align-items-start py-3 ${index !== sortedEvents.length - 1 ? 'border-bottom' : ''}" style="background: transparent;">
+        <div class="flex-grow-1">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <h6 class="mb-0">${escapeHtml(event.title || 'Event')}</h6>
+            <span class="badge bg-success">Upcoming</span>
+          </div>
+          <p class="text-muted small mb-2">${escapeHtml(event.description || '')}</p>
+          <div class="d-flex flex-wrap gap-3 text-muted small">
+            <span><i class="fas fa-calendar me-1" style="color: #6EE7B7;"></i>${formatDate(event.date)} (${dateLabel})</span>
+            <span><i class="fas fa-map-pin me-1" style="color: #6EE7B7;"></i>${escapeHtml(event.venue || 'TBD')}</span>
+            <span><i class="fas fa-users me-1" style="color: #8B5CF6;"></i>${participantsCount}/${maxParticipants}</span>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-outline-light ms-2" onclick="viewEventDetails('${eventId}')">
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// Load past events for past events section
+function loadPastEvents() {
+  const pastEventsContainer = document.getElementById('past-events');
+  
+  fetch('/api/faculty/events-past')
+    .then(response => response.json())
+    .then(data => {
+      console.log('Past events loaded:', data);
+      displayPastEvents(data.events);
+    })
+    .catch(error => {
+      console.error('Error loading past events:', error);
+      if (pastEventsContainer) {
+        pastEventsContainer.innerHTML = '<p class="text-danger text-center">Failed to load past events</p>';
+      }
+    });
+}
+
+// Display past events in a card grid layout
+function displayPastEvents(events) {
+  const container = document.getElementById('past-events');
+  
+  if (!container) return;
+  
+  if (!events || events.length === 0) {
+    container.innerHTML = '<p class="text-muted text-center">No past events available</p>';
+    return;
+  }
+  
+  // Sort by date descending (newest first)
+  const sortedEvents = events.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  let html = '<div class="row g-3">';
+  
+  sortedEvents.forEach(event => {
+    const eventId = event._id || event.event_id;
+    const participantsCount = event.registered_users ? event.registered_users.length : event.current_participants || 0;
+    const maxParticipants = event.max_participants || 'Unlimited';
+    const completionPercentage = maxParticipants !== 'Unlimited' ? Math.round((participantsCount / maxParticipants) * 100) : 100;
+    
+    html += `
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100" style="background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(139,92,246,0.04)); border: 1px solid rgba(139,92,246,0.2); transition: all 0.3s ease;">
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h6 class="card-title mb-0">${escapeHtml(event.title || 'Event')}</h6>
+              <span class="badge bg-secondary">Completed</span>
+            </div>
+            <p class="card-text small text-muted mb-3">${escapeHtml(event.description || '')}</p>
+            
+            <div class="small text-muted space-y-2 mt-auto">
+              <p class="mb-2">
+                <i class="fas fa-calendar me-2" style="color: #6EE7B7;"></i>
+                <strong>Date:</strong> ${formatDate(event.date)}
+              </p>
+              <p class="mb-2">
+                <i class="fas fa-map-pin me-2" style="color: #6EE7B7;"></i>
+                <strong>Venue:</strong> ${escapeHtml(event.venue || 'TBD')}
+              </p>
+              <p class="mb-2">
+                <i class="fas fa-users me-2" style="color: #8B5CF6;"></i>
+                <strong>Attendance:</strong> ${participantsCount}/${maxParticipants}
+              </p>
+              <div class="mb-2">
+                <small class="text-muted">Attendance Rate</small>
+                <div class="progress mt-1" style="height: 6px;">
+                  <div class="progress-bar bg-success" role="progressbar" style="width: ${completionPercentage}%"></div>
+                </div>
+              </div>
+              <p class="mb-0">
+                <i class="fas fa-star me-2" style="color: #FFD700;"></i>
+                <strong>Points Awarded:</strong> ${event.points || 0}
+              </p>
+            </div>
+            
+            <div class="mt-3 pt-3 border-top border-secondary">
+              <button class="btn btn-sm btn-outline-light w-100" onclick="viewEventDetails('${eventId}')">
+                <i class="fas fa-eye me-2"></i>View Winners
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// Display all events in a card grid layout
+function displayAllEventsForFaculty(events) {
+  const container = document.getElementById('all-events');
+  
+  if (!container) return;
+  
+  if (!events || events.length === 0) {
+    container.innerHTML = '<p class="text-muted text-center">No events available</p>';
+    return;
+  }
+  
+  let html = '<div class="row g-3">';
+  
+  events.forEach(event => {
+    const eventId = event._id || event.event_id;
+    const participantsCount = event.registered_users ? event.registered_users.length : event.current_participants || 0;
+    const maxParticipants = event.max_participants || 'Unlimited';
+    const statusBadge = event.status === 'upcoming' ? 
+      '<span class="badge bg-success">Upcoming</span>' : 
+      '<span class="badge bg-secondary">Past</span>';
+    
+    html += `
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 event-card" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease;">
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h6 class="card-title mb-0">${escapeHtml(event.title || 'Event')}</h6>
+              ${statusBadge}
+            </div>
+            <p class="card-text small text-muted mb-3">${escapeHtml(event.description || '')}</p>
+            
+            <div class="small text-muted space-y-2 mt-auto">
+              <p class="mb-2">
+                <i class="fas fa-calendar me-2" style="color: #6EE7B7;"></i>
+                <strong>Date:</strong> ${formatDate(event.date)}
+              </p>
+              <p class="mb-2">
+                <i class="fas fa-clock me-2" style="color: #8B5CF6;"></i>
+                <strong>Time:</strong> ${event.time || 'TBD'}
+              </p>
+              <p class="mb-2">
+                <i class="fas fa-map-pin me-2" style="color: #6EE7B7;"></i>
+                <strong>Venue:</strong> ${escapeHtml(event.venue || 'TBD')}
+              </p>
+              <p class="mb-2">
+                <i class="fas fa-users me-2" style="color: #8B5CF6;"></i>
+                <strong>Participants:</strong> ${participantsCount}/${maxParticipants}
+              </p>
+              <p class="mb-0">
+                <i class="fas fa-star me-2" style="color: #FFD700;"></i>
+                <strong>Points:</strong> ${event.points || 0}
+              </p>
+            </div>
+            
+            <div class="mt-3 pt-3 border-top border-secondary">
+              <button class="btn btn-sm btn-outline-light w-100" onclick="viewEventDetails('${eventId}')">
+                <i class="fas fa-eye me-2"></i>View Details
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Helper function to format date
+function formatDate(dateStr) {
+  if (!dateStr) return 'N/A';
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  } catch (e) {
+    return dateStr;
+  }
+}
+
+// View event details (can be expanded later)
+function viewEventDetails(eventId) {
+  console.log('Viewing event:', eventId);
+  alert('Event details feature coming soon!');
+}
+
+// Load clubs from backend and populate dropdown
+function loadClubsForDropdown() {
+  fetch('/api/clubs/all_clubs')
+    .then(response => response.json())
+    .then(data => {
+      console.log('Clubs loaded:', data);
+      populateClubsDropdown(data.clubs);
+    })
+    .catch(error => {
+      console.error('Error loading clubs:', error);
+    });
+}
+
+// Populate clubs dropdown with clubs from database
+function populateClubsDropdown(clubs) {
+  const clubSelect = document.getElementById('event-club');
+  if (!clubSelect) return;
+  
+  // Clear existing options except first one
+  while (clubSelect.options.length > 1) {
+    clubSelect.remove(1);
+  }
+  
+  // Add clubs from database
+  if (clubs && clubs.length > 0) {
+    clubs.forEach(club => {
+      const option = document.createElement('option');
+      option.value = club.name || club._id || '';
+      option.textContent = club.name || 'Unknown Club';
+      clubSelect.appendChild(option);
+    });
+  }
+}
+
+// Handle create event form submission
+function handleCreateEvent(e) {
+  e.preventDefault();
+  
+  const form = e.target;
+  const formData = new FormData(form);
+  
+  // Build event object from form
+  const eventData = {
+    title: formData.get('title'),
+    description: formData.get('description'),
+    club: [formData.get('club')],
+    certificates: [],
+    date: formData.get('date'),
+    time: formData.get('time'),
+    venue: formData.get('venue'),
+    max_participants: parseInt(formData.get('maxParticipants')) || 100,
+    current_participants: 0,
+    status: 'upcoming',
+    points: parseInt(formData.get('points')) || 10
+  };
+  
+  // Send to backend
+  fetch('/api/events/create-event', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(eventData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Event created:', data);
+    alert('Event created successfully!');
+    form.reset();
+    showSection(null, 'events');
+  })
+  .catch(error => {
+    console.error('Error creating event:', error);
+    alert('Failed to create event. Please try again.');
+  });
+}
+
+</script>
+
+</body>
+</html>

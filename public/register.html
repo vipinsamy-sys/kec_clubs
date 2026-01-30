@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Club Event System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .split-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Left Side - Premium Brand Section */
+        .brand-side {
+            flex: 1;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 50%, #16213e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .brand-side::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle, rgba(218, 165, 32, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: moveGrid 20s linear infinite;
+        }
+
+        .brand-side::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(218, 165, 32, 0.15), transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes moveGrid {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(40px, 40px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.6; }
+        }
+
+        .brand-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+            padding: 2rem;
+        }
+
+        .brand-icon {
+            font-size: 6rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #ffd700, #daa520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(218, 165, 32, 0.5));
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .brand-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-content p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            color: #e0e0e0;
+        }
+
+        /* Right Side - Form Section */
+        .form-side {
+            flex: 1;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 550px;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .form-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .nav-tabs {
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-tabs .nav-link {
+            color: #666;
+            font-weight: 600;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #daa520;
+            background: transparent;
+            border-bottom: 3px solid #daa520;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: #daa520;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 0.5rem;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .form-control, .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: #daa520;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(218, 165, 32, 0.1);
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-register::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(218, 165, 32, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-register:hover::before {
+            left: 100%;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(26, 26, 46, 0.4);
+            color: white;
+        }
+
+        .text-link {
+            color: #daa520;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .text-link:hover {
+            color: #1a1a2e;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            color: #999;
+        }
+
+        .tab-content h5 {
+            color: #1a1a2e;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        /* Modal Styling */
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+            color: white;
+            border-radius: 15px;
+            border: 2px solid rgba(218, 165, 32, 0.3);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(218, 165, 32, 0.2);
+        }
+
+        .modal-body .btn {
+            background: linear-gradient(135deg, #daa520, #ffd700);
+            color: #1a1a2e;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 30px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .modal-body .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(218, 165, 32, 0.5);
+        }
+
+        .btn-close-white {
+            filter: brightness(0) invert(1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .split-container {
+                flex-direction: column;
+            }
+
+            .brand-side {
+                min-height: 30vh;
+            }
+
+            .brand-content h1 {
+                font-size: 2rem;
+            }
+
+            .brand-icon {
+                font-size: 4rem;
+            }
+
+            .form-side {
+                padding: 1.5rem;
+            }
+
+            .nav-tabs .nav-link {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="split-container">
+        <!-- Left Side - Premium Brand -->
+        <div class="brand-side">
+            <div class="brand-content">
+                <div class="brand-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h1>Register Now</h1>
+                <p>Create your account and unlock exclusive event access</p>
+            </div>
+        </div>
+
+        <!-- Right Side - Form -->
+        <div class="form-side">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2>Create Account</h2>
+                    <p>Fill in your details to get started</p>
+                </div>
+
+                <!-- Role Tabs -->
+                <ul class="nav nav-tabs" id="roleTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="student-tab" data-bs-toggle="tab" data-bs-target="#studentSection">Student</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="faculty-tab" data-bs-toggle="tab" data-bs-target="#facultySection">Faculty</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#adminSection">Admin</button>
+                    </li>
+                </ul>
+
+                <form id="registerForm">
+                    <div class="tab-content">
+                        <!-- Student Section -->
+                        <div class="tab-pane fade show active" id="studentSection">
+                            <h5>Student Details</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Name</label>
+                                    <input type="text" class="form-control" name="name" placeholder="Full Name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" name="email" placeholder="Email Address" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" class="form-control" name="password" placeholder="Password" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone</label>
+                                    <input type="tel" class="form-control" name="phone" placeholder="Phone Number" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Student ID</label>
+                                    <input type="text" class="form-control" name="studentId" placeholder="e.g. 21CSE105" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Department</label>
+                                    <select class="form-select" name="department" required>
+                                        <option value="">Select Department</option>
+                                        <option>Mechatronics</option>
+                                        <option>Computer Science</option>
+                                        <option>Information Technology</option>
+                                        <option>Electronics</option>
+                                        <option>Mechanical</option>
+                                        <option>Civil</option>
+                                        <option>Electrical</option>
+                                        <option>Other</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Year</label>
+                                    <select class="form-select" name="year" required>
+                                        <option value="">Select Year</option>
+                                        <option>1st year</option>
+                                        <option>2nd year</option>
+                                        <option>3rd year</option>
+                                        <option>4th year</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Faculty Section -->
+                        <div class="tab-pane fade" id="facultySection">
+                            <h5>Faculty Details</h5>
+                            <p class="text-muted">Faculty registration is disabled. Only students can register.</p>
+                        </div>
+
+                        <!-- Admin Section -->
+                        <div class="tab-pane fade" id="adminSection">
+                            <h5>Admin Details</h5>
+                            <p class="text-muted">Admin registration is disabled. Only students can register.</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-register">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+                    </div>
+                </form>
+
+                <div class="divider">
+                    <p class="mb-0">Already have an account? <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" class="text-link">Login here</a></p>
+                </div>
+
+                <div class="text-center">
+                    <a href="index.html" class="text-link">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4 text-center position-relative">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                
+                <div class="modal-header border-0 justify-content-center">
+                    <h5 class="modal-title fw-bold" id="loginModalLabel">Choose Your Role</h5>
+                </div>
+
+                <div class="modal-body">
+                    <a href="student-login.html" class="btn m-2">Student</a>
+                    <a href="admin-login.html" class="btn m-2">Admin</a>
+                    <a href="faculty-login.html" class="btn m-2">Faculty</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(e){
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const registerData = {    
+                name: formData.get('name'),   
+                email: formData.get('email'),   
+                password: formData.get('password'),    
+                user_number: parseInt(formData.get('phone')),
+                user_roll: formData.get('studentId'),
+                dept: formData.get('department'),
+                year: formData.get('year'),
+            };
+
+            try{
+                const response = await fetch('/api/users/register', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify(registerData)
+                });
+                const result = await response.json();
+                if(response.ok){
+                    alert('Registration successful!');
+                    window.location.href = 'student-login.html';
+                } else {
+                    alert(result.message || 'Registration failed');
+                }
+            } catch(err){
+                console.error(err);
+                alert('Registration failed. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>
