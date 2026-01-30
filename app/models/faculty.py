@@ -12,6 +12,18 @@ class faculty_data(BaseModel):
     fac_number : str = Field(..., pattern=r"^[A-Z]{3}\d{3}$")
     dept : str
 
+class PromotionData(BaseModel):
+    studentId: str
+    email: EmailStr
+    name: str
+    clubId: str
+    clubName: str
+    role: str = "admin"
+
+class RemoveAdminData(BaseModel):
+    studentId: str
+    clubId: str
+
 
 
 

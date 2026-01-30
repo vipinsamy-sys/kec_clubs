@@ -1249,6 +1249,18 @@ window.addEventListener('load', function() {
   // Load past events
   loadPastEvents();
   
+  // Load admins list on page load
+  loadAdmins();
+  
+  // Setup modal event listeners
+  const promoteModal = document.getElementById('promoteStudentModal');
+  if (promoteModal) {
+    promoteModal.addEventListener('show.bs.modal', function() {
+      loadStudentsForPromotion();
+      loadClubsForPromotion();
+    });
+  }
+  
   // Setup create event form submission
   const createEventForm = document.getElementById('create-event-form');
   if (createEventForm) {
@@ -1612,6 +1624,571 @@ function handleCreateEvent(e) {
     alert('Failed to create event. Please try again.');
   });
 }
+
+
+//filters
+// Apply filters to get filtered students
+function applyFilters() {
+  const club = document.getElementById("filter-club").value;
+  const department = document.getElementById("filter-department").value;
+  const year = document.getElementById("filter-year").value;
+  const output = document.getElementById("filter-output");
+
+  if (!club && !department && !year) {
+    output.innerHTML = `<p class="text-muted text-center">Please select at least one filter</p>`;
+    return;
+  }
+
+  // Show loading state
+  output.innerHTML = `<div class="text-center"><div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+
+  let url = `/api/faculty/filter-participants?`;
+  if (club) url += `club=${encodeURIComponent(club)}&`;
+  if (department) url += `department=${encodeURIComponent(department)}&`;
+  if (year) url += `year=${encodeURIComponent(year)}&`;
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      if (data.students && data.students.length > 0) {
+        displayFilteredStudents(data.students);
+      } else {
+        output.innerHTML = `<p class="text-muted text-center">No students found matching your criteria</p>`;
+      }
+    })
+    .catch(err => {
+      console.error("Filter error:", err);
+      output.innerHTML = `<p class="text-danger text-center">Error loading filtered data</p>`;
+    });
+}
+
+// Display filtered students in table format
+function displayFilteredStudents(students) {
+  const output = document.getElementById("filter-output");
+
+  if (!students || students.length === 0) {
+    output.innerHTML = `<p class="text-muted text-center">No students found</p>`;
+    return;
+  }
+
+  let html = `
+    <div class="table-responsive">
+      <table class="table table-dark table-hover table-striped mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Roll Number</th>
+            <th>Department</th>
+            <th>Year</th>
+            <th>Club</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  students.forEach(s => {
+    html += `
+      <tr>
+        <td>${escapeHtml(s.name || "-")}</td>
+        <td>${escapeHtml(s.email || "-")}</td>
+        <td>${escapeHtml(s.user_roll || s.roll_number || "-")}</td>
+        <td>${escapeHtml(s.department || "-")}</td>
+        <td>${s.year || "-"}</td>
+        <td>${escapeHtml(s.club || "-")}</td>
+      </tr>
+    `;
+  });
+
+  html += `
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-2 text-muted small">Total: ${students.length} student(s)</div>
+  `;
+
+  output.innerHTML = html;
+}
+
+// Clear all filters
+function clearFilters() {
+  document.getElementById("filter-club").value = "";
+  document.getElementById("filter-department").value = "";
+  document.getElementById("filter-year").value = "";
+  document.getElementById("filter-month").value = "";
+  document.getElementById("filter-week").value = "";
+
+  document.getElementById("filter-output").innerHTML = `
+    <p class="text-muted text-center">
+      <i class="fas fa-info-circle me-2"></i>Select filters to view student participation details
+    </p>
+  `;
+}
+
+// Export filtered students to CSV
+function exportParticipantsCSV() {
+  // Check for table in participants section first, then filters section
+  const participantsContainer = document.getElementById("participants-list");
+  const filterContainer = document.getElementById("filter-output");
+  
+  let table = null;
+  let eventTitle = "participants";
+  
+  // Try to get from participants section
+  if (participantsContainer) {
+    table = participantsContainer.querySelector("table");
+    const titleEl = participantsContainer.querySelector("h6");
+    if (titleEl) {
+      eventTitle = titleEl.textContent.trim().replace(/^Event:\s*/i, '').replace(/[^a-z0-9]/gi, '_');
+    }
+  }
+  
+  // Fallback to filter section
+  if (!table && filterContainer) {
+    table = filterContainer.querySelector("table");
+    if (!table) {
+      const tables = filterContainer.querySelectorAll("table");
+      if (tables.length > 0) {
+        table = tables[0];
+      }
+    }
+  }
+  
+  if (!table) {
+    alert("No participants to export. Please select an event or apply filters first.");
+    return;
+  }
+
+  try {
+    let csv = "";
+    const rows = table.querySelectorAll("tr");
+    
+    if (rows.length === 0) {
+      alert("No data found in table. Please ensure participants are loaded.");
+      return;
+    }
+    
+    rows.forEach(row => {
+      const cells = row.querySelectorAll("td, th");
+      const rowData = Array.from(cells).map(cell => {
+        const text = cell.textContent.trim();
+        // Escape quotes and wrap in quotes
+        return `"${text.replace(/"/g, '""')}"`;  
+      }).join(",");
+      if (rowData.trim()) {
+        csv += rowData + "\n";
+      }
+    });
+
+    if (!csv.trim()) {
+      alert("No data to export.");
+      return;
+    }
+
+    // Create and download CSV
+    const filename = `${eventTitle}_participants_${new Date().getTime()}.csv`;
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    link.style.visibility = "hidden";
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Cleanup
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 100);
+    
+    console.log('CSV exported successfully:', filename);
+  } catch (error) {
+    console.error('Error exporting CSV:', error);
+    alert("Error exporting CSV: " + (error.message || "Unknown error"));
+  }
+}
+
+// MANAGE ADMINS FUNCTIONS
+
+// Load all students for promotion dropdown
+async function loadStudentsForPromotion() {
+  try {
+    const response = await fetch('/api/faculty/get-students', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const students = await response.json();
+      const select = document.getElementById('student-select');
+      if (select) {
+        select.innerHTML = '<option value="">Choose a student...</option>' + 
+          (Array.isArray(students) ? students : []).map(s => 
+            `<option value="${escapeAttr(s._id || s.id)}" data-email="${escapeAttr(s.email || '')}">${escapeHtml(s.name || 'Unknown')} (${escapeHtml(s.studentId || 'N/A')})</option>`
+          ).join('');
+      }
+    } else {
+      const select = document.getElementById('student-select');
+      if (select) select.innerHTML = '<option value="">Error loading students...</option>';
+    }
+  } catch (error) {
+    console.error('Error loading students for promotion:', error);
+    const select = document.getElementById('student-select');
+    if (select) select.innerHTML = '<option value="">Error loading students...</option>';
+  }
+}
+
+// Load all clubs for promotion dropdown
+async function loadClubsForPromotion() {
+  try {
+    const response = await fetch('/api/clubs/all_clubs', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      const clubs = data.clubs || [];
+      const select = document.getElementById('club-name');
+      if (select) {
+        select.innerHTML = '<option value="">Choose a club...</option>' + 
+          (Array.isArray(clubs) ? clubs : []).map(c => 
+            `<option value="${escapeAttr(c._id || c.id || c.name || '')}">${escapeHtml(c.name || 'Unknown Club')}</option>`
+          ).join('');
+      }
+    } else {
+      const select = document.getElementById('club-name');
+      if (select) select.innerHTML = '<option value="">Error loading clubs...</option>';
+    }
+  } catch (err) {
+    console.error('Error loading clubs for promotion:', err);
+    const select = document.getElementById('club-name');
+    if (select) select.innerHTML = '<option value="">Error loading clubs...</option>';
+  }
+}
+
+// Promote selected student to admin
+async function promoteStudent() {
+  const studentSelect = document.getElementById('student-select');
+  const clubSelect = document.getElementById('club-name');
+  
+  if (!studentSelect || !clubSelect) {
+    alert('Error: Form elements not found');
+    return;
+  }
+
+  const studentId = studentSelect.value;
+  const studentOption = studentSelect.options[studentSelect.selectedIndex];
+  const studentEmail = studentOption ? studentOption.getAttribute('data-email') : '';
+  const studentName = studentOption ? studentOption.textContent.split('(')[0].trim() : '';
+  
+  const clubId = clubSelect.value;
+  const clubName = clubSelect.options[clubSelect.selectedIndex]?.textContent?.trim() || '';
+
+  if (!studentId || !clubId) {
+    alert('Please select both a student and a club');
+    return;
+  }
+
+  try {
+    const promotionData = {
+      studentId: studentId,
+      email: studentEmail,
+      name: studentName,
+      clubId: clubId,
+      clubName: clubName,
+      role: 'admin'
+    };
+
+    const response = await fetch('/api/faculty/promote-admin', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(promotionData)
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      alert(`${studentName} has been promoted to Admin for ${clubName}!`);
+      
+      // Reset form
+      studentSelect.value = '';
+      clubSelect.value = '';
+      
+      // Close modal
+      try {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('promoteStudentModal'));
+        if (modal) modal.hide();
+      } catch (e) {}
+      
+      // Reload admins list
+      loadAdmins();
+    } else {
+      let errorData = {};
+      try {
+        errorData = await response.json();
+      } catch (e) {}
+      alert(errorData.message || 'Failed to promote student to admin');
+    }
+  } catch (error) {
+    console.error('Error promoting student:', error);
+    alert('Error: ' + (error.message || 'Failed to promote student. Please try again.'));
+  }
+}
+
+// Load and display list of current admins
+async function loadAdmins() {
+  const container = document.getElementById('admins-list');
+  if (!container) return;
+
+  container.innerHTML = `<div class="text-center"><div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+
+  try {
+    const response = await fetch('/api/faculty/get-admins', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const admins = Array.isArray(data) ? data : (data.admins || []);
+
+      if (admins.length === 0) {
+        container.innerHTML = `<p class="text-muted text-center">No admins assigned yet</p>`;
+        return;
+      }
+
+      let html = `
+        <div class="table-responsive">
+          <table class="table table-dark table-hover table-striped mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Admin Name</th>
+                <th>Email</th>
+                <th>Club</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      admins.forEach(admin => {
+        html += `
+          <tr>
+            <td>${escapeHtml(admin.name || 'Unknown')}</td>
+            <td>${escapeHtml(admin.email || '-')}</td>
+            <td>${escapeHtml(admin.clubName || admin.club || 'N/A')}</td>
+            <td><span class="badge bg-success">Active</span></td>
+            <td>
+              <button class="btn btn-sm btn-danger" onclick="removeAdmin('${escapeAttr(admin._id || admin.studentId)}', '${escapeAttr(admin.clubId)}')">
+                <i class="fas fa-trash me-1"></i>Remove
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-2 text-muted small">Total: ${admins.length} admin(s)</div>
+      `;
+
+      container.innerHTML = html;
+    } else {
+      container.innerHTML = `<p class="text-danger text-center">Failed to load admins</p>`;
+    }
+  } catch (error) {
+    console.error('Error loading admins:', error);
+    container.innerHTML = `<p class="text-danger text-center">Error loading admins</p>`;
+  }
+}
+
+// Remove admin
+async function removeAdmin(studentId, clubId) {
+  if (!confirm('Are you sure you want to remove this admin?')) {
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/faculty/remove-admin', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ studentId, clubId })
+    });
+
+    if (response.ok) {
+      alert('Admin removed successfully!');
+      loadAdmins();
+    } else {
+      const errorData = await response.json();
+      alert(errorData.message || 'Failed to remove admin');
+    }
+  } catch (error) {
+    console.error('Error removing admin:', error);
+    alert('Error removing admin');
+  }
+}
+
+// Load event participants
+function loadEventParticipants() {
+  const eventSelect = document.getElementById("event-select");
+  const eventId = eventSelect ? eventSelect.value : null;
+  const container = document.getElementById("participants-list");
+  
+  if (!eventId) {
+    if (container) {
+      container.innerHTML = `<p class="text-muted text-center"><i class="fas fa-info-circle me-2"></i>Select an event to view participants</p>`;
+    }
+    return;
+  }
+
+  if (container) {
+    container.innerHTML = `<div class="text-center"><div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+  }
+
+  fetch(`/api/faculty/event-participants?event_id=${encodeURIComponent(eventId)}`)
+    .then(response => response.json())
+    .then(data => {
+      if (container) {
+        if (!data.participants || data.participants.length === 0) {
+          container.innerHTML = `<p class="text-muted text-center">No participants for this event</p>`;
+        } else {
+          let html = `
+            <div class="table-responsive">
+              <table class="table table-dark table-hover table-striped mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Roll Number</th>
+                    <th>Department</th>
+                    <th>Year</th>
+                    <th>Club</th>
+                  </tr>
+                </thead>
+                <tbody>
+          `;
+          
+          data.participants.forEach(p => {
+            html += `
+              <tr>
+                <td>${escapeHtml(p.name || "-")}</td>
+                <td>${escapeHtml(p.email || "-")}</td>
+                <td>${escapeHtml(p.user_roll || p.roll_number || "-")}</td>
+                <td>${escapeHtml(p.department || "-")}</td>
+                <td>${p.year || "-"}</td>
+                <td>${escapeHtml(p.club || "-")}</td>
+              </tr>
+            `;
+          });
+          
+          html += `
+                </tbody>
+              </table>
+            </div>
+            <div class="mt-2 text-muted small">Total: ${data.participants.length} participant(s)</div>
+          `;
+          
+          container.innerHTML = html;
+        }
+      }
+    })
+    .catch(error => {
+      console.error("Error loading participants:", error);
+      if (container) {
+        container.innerHTML = `<p class="text-danger text-center">Failed to load participants</p>`;
+      }
+    });
+}
+
+// Load filter dropdowns with data from backend
+function loadFilterDropdowns() {
+  const filterClubSelect = document.getElementById("filter-club");
+  const eventSelect = document.getElementById("event-select");
+  const filterDeptSelect = document.getElementById("filter-department");
+
+  // Load clubs for filter dropdown
+  if (filterClubSelect) {
+    fetch("/api/clubs/all_clubs")
+      .then(res => res.json())
+      .then(data => {
+        if (data.clubs && data.clubs.length > 0) {
+          data.clubs.forEach(c => {
+            const opt = document.createElement("option");
+            opt.value = c.name || c._id || "";
+            opt.textContent = c.name || "Unknown Club";
+            filterClubSelect.appendChild(opt);
+          });
+        }
+      })
+      .catch(err => console.error("Error loading clubs:", err));
+  }
+
+  // Load departments for filter dropdown
+  if (filterDeptSelect) {
+    fetch("/api/faculty/departments")
+      .then(res => res.json())
+      .then(data => {
+        if (data.departments && data.departments.length > 0) {
+          data.departments.forEach(d => {
+            const opt = document.createElement("option");
+            opt.value = d;
+            opt.textContent = d;
+            filterDeptSelect.appendChild(opt);
+          });
+        }
+      })
+      .catch(err => console.error("Error loading departments:", err));
+  }
+
+  // Load events for participants section
+  if (eventSelect) {
+    fetch("/api/faculty/all_events")
+      .then(res => res.json())
+      .then(data => {
+        if (data.events && data.events.length > 0) {
+          data.events.forEach(e => {
+            const opt = document.createElement("option");
+            opt.value = e._id || e.event_id || "";
+            opt.textContent = e.title || "Unknown Event";
+            eventSelect.appendChild(opt);
+          });
+        }
+      })
+      .catch(err => console.error("Error loading events:", err));
+  }
+}
+
+function updateWeekOptions() {
+  // Future implementation for week calculation based on month
+  const monthSelect = document.getElementById("filter-month");
+  const weekSelect = document.getElementById("filter-week");
+  if (monthSelect && weekSelect) {
+    weekSelect.disabled = !monthSelect.value;
+  }
+}
+
+window.addEventListener("load", loadFilterDropdowns);
 
 </script>
 

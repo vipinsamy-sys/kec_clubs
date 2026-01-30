@@ -18,7 +18,11 @@ class ObjectIdEncoder(json.JSONEncoder):
 def get_all_clubs():
     clubs_collection = db["clubs"]
     
-    clubs = list(clubs_collection.find({}, {"_id": 0}))  # exclude ObjectId
+    clubs = list(clubs_collection.find({}))
+    
+    # Convert ObjectId to string for JSON serialization
+    for club in clubs:
+        club["_id"] = str(club["_id"])
     
     return {
         "count": len(clubs),
