@@ -1,225 +1,418 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Dashboard - Club Event System (Glassmorphism)</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Student Dashboard - Club Event System (Glassmorphism)</title>
 
-  <!-- Bootstrap + Font Awesome + Select2 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Bootstrap + Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <!-- Optional modern fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Optional modern fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    /*    =========
-       GLASSMORPHISM THEME — EXACTLY MATCHES STUDENT CODE (colors/placements)
-          ========= */
-    :root{
-      --bg-1: linear-gradient(135deg, #07102a 0%, #0b1a3a 40%, #081124 100%);
-      --accent-1: #6EE7B7; /* mint */
-      --accent-2: #8B5CF6; /* violet */
-      --glass-bg: rgba(255,255,255,0.06);
-      --glass-border: rgba(255,255,255,0.10);
-      --card-radius: 14px;
-      --shadow-strong: 0 18px 50px rgba(2,6,23,0.6);
-      --muted-light: rgba(255,255,255,0.75);
-      --muted-dark: rgba(15,23,42,0.85);
-      --glass-accent: linear-gradient(135deg, rgba(110,231,183,0.08), rgba(139,92,246,0.06));
+    <style>
+        /* ========== Glassmorphism Theme ========== */
+        :root{
+            --bg-1: linear-gradient(135deg, #07102a 0%, #0b1a3a 40%, #081124 100%);
+            --accent-1: #6EE7B7; /* mint */
+            --accent-2: #8B5CF6; /* violet */
+            --glass-bg: rgba(255,255,255,0.06);
+            --glass-border: rgba(255,255,255,0.10);
+            --card-radius: 14px;
+            --shadow-strong: 0 18px 50px rgba(2,6,23,0.6);
+            --muted-light: rgba(255,255,255,0.75);
+            --muted-dark: rgba(15,23,42,0.85);
+            --glass-accent: linear-gradient(135deg, rgba(110,231,183,0.08), rgba(139,92,246,0.06));
+        }
+
+        /* Reset / base */
+        *{ box-sizing: border-box; }
+        html,body{ height:100%; }
+        body{
+            margin:0;
+            font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            color: var(--muted-light);
+            background: var(--bg-1);
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+            line-height:1.45;
+            padding: 0;
+        }
+
+        /* Container wrapper */
+        .app-wrapper { min-height:100vh; display:flex; flex-direction:row; }
+
+        /* ========= SIDEBAR ========= */
+        .sidebar {
+            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+            backdrop-filter: blur(14px) saturate(120%);
+            -webkit-backdrop-filter: blur(14px) saturate(120%);
+            border-right: 1px solid var(--glass-border);
+            box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+            color: var(--muted-light);
+            z-index: 1050;
+            transition: width 0.28s ease, transform 0.28s ease, opacity 0.28s;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-bottom: 48px;
+            width: 250px;
+            min-height: 100vh;
+        }
+
+        /* collapsed (desktop) */
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar .p-3 { padding-top: 28px; padding-bottom: 8px; }
+
+        .sidebar .sidebar-title {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-family: "Space Grotesk", Inter, sans-serif;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -0.01em;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-shadow: 0 6px 20px rgba(139,92,246,0.08);
+        }
+
+        .sidebar .nav {
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.85);
+            padding: 10px 18px;
+            border-radius: 12px;
+            margin: 6px;
+            transition: transform 210ms cubic-bezier(.2,.9,.3,1), background 210ms, color 210ms, box-shadow 210ms;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .sidebar .nav-link i {
+            min-width: 22px;
+            text-align: center;
+            font-size: 16px;
+            filter: drop-shadow(0 4px 12px rgba(139,92,246,0.08));
+        }
+
+        .sidebar .nav-link span {
+            margin-left: 12px;
+            font-weight: 600;
+            transition: opacity 180ms ease;
+        }
+
+        /* hide link labels when collapsed */
+        .sidebar.collapsed .nav-link span { display: none; }
+        .sidebar.collapsed .sidebar-title { display: none; }
+
+        .sidebar .nav-link:hover {
+            transform: translateY(-4px);
+            background: rgba(255,255,255,0.06);
+            color: white;
+            box-shadow: 0 8px 24px rgba(2,6,23,0.5);
+        }
+
+        .sidebar .nav-link.active {
+            background: linear-gradient(90deg, rgba(110,231,183,0.08), rgba(139,92,246,0.08));
+            color: white;
+            box-shadow: 0 12px 30px rgba(139,92,246,0.08);
+        }
+
+        .sidebar-toggle {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: white;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 180ms;
+        }
+        .sidebar-toggle:hover { transform: translateY(-3px); }
+
+        hr { border-color: rgba(255,255,255,0.04); margin: 18px 6px; }
+
+        /* ========= MAIN ========= */
+        .main-content {
+            flex: 1;
+            min-height: 100vh;
+            padding: 24px;
+            transition: margin-left 0.28s ease;
+        }
+
+        /* header */
+        #page-title { font-family: "Space Grotesk", Inter, sans-serif; color: #ffffff; font-size: 22px; }
+        .mobile-toggle { display: none; }
+
+        .badge-custom {
+            background: linear-gradient(90deg, rgba(110,231,183,0.16), rgba(139,92,246,0.14));
+            color: white;
+            border-radius: 10px;
+            padding: 6px 10px;
+            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(139,92,246,0.06);
+        }
+
+        /* ========= CARDS (glass) ========= */
+        .card {
+            border: 1px solid rgba(255,255,255,0.06);
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            backdrop-filter: blur(8px) saturate(120%);
+            -webkit-backdrop-filter: blur(8px) saturate(120%);
+            border-radius: var(--card-radius);
+            box-shadow: 0 6px 20px rgba(2,6,23,0.50);
+            transition: transform 220ms, box-shadow 220ms;
+        }
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-strong);
+        }
+        .card .card-header {
+            background: transparent;
+            border-bottom: none;
+            color: var(--muted-light);
+            font-weight: 700;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            font-family: "Space Grotesk", Inter, sans-serif;
+        }
+        .card .card-body { color: rgba(255,255,255,0.92); }
+
+        .event-card { border-left: 4px solid rgba(110,231,183,0.28); }
+        .certificate-card { border-left: 4px solid rgba(40,167,69,0.22); }
+
+        /* Stats card special - redesigned block style */
+        .dashboard-stats-wrap {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            align-items: stretch;
+        }
+
+        .stat-glass {
+            flex: 1 1 200px; /* allows wrapping */
+            min-width: 200px;
+            border-radius: 14px;
+            padding: 18px;
+            position: relative;
+            overflow: hidden;
+            color: white;
+            background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 8px 30px rgba(2,6,23,0.45);
+            transition: transform 240ms cubic-bezier(.2,.9,.3,1), box-shadow 240ms;
+        }
+        .stat-glass:hover { transform: translateY(-8px); box-shadow: var(--shadow-strong); }
+
+        .stat-glass .stat-left {
+            display:flex;
+            flex-direction:row;
+            gap:12px;
+            align-items:center;
+        }
+        .stat-glass .stat-left .icon-wrap {
+            width:62px;
+            height:62px;
+            border-radius:12px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:24px;
+            flex-shrink:0;
+            box-shadow: 0 6px 18px rgba(2,6,23,0.45);
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .stat-glass .stat-left .meta {
+            display:flex;
+            flex-direction:column;
+            gap:4px;
+            text-align:left;
+        }
+        .stat-glass .meta .label { font-weight:700; color: rgba(255,255,255,0.92); font-size:14px; }
+        .stat-glass .meta .value { font-size:24px; font-weight:800; letter-spacing: -0.02em; }
+
+        /* color variants */
+        .stat-mint { background: linear-gradient(135deg, rgba(110,231,183,0.08), rgba(110,231,183,0.02)); border-left: 4px solid rgba(110,231,183,0.22); }
+        .stat-violet { background: linear-gradient(135deg, rgba(139,92,246,0.06), rgba(139,92,246,0.02)); border-left: 4px solid rgba(139,92,246,0.22); }
+        .stat-gold { background: linear-gradient(135deg, rgba(255,205,90,0.06), rgba(255,205,90,0.02)); border-left: 4px solid rgba(255,205,90,0.18); }
+        .stat-rose { background: linear-gradient(135deg, rgba(255,120,150,0.06), rgba(255,120,150,0.02)); border-left: 4px solid rgba(255,120,150,0.18); }
+
+        /* stats number micro animation (count-up ready) */
+        .count-animate { transition: all 420ms cubic-bezier(.2,.9,.3,1); }
+
+        /* Searchbar styling (fits glass theme) */
+        .search-area {
+            display:flex;
+            align-items:center;
+            gap:12px;
+            flex-wrap:wrap;
+            margin-bottom:16px;
+            justify-content:center; /* center the search area */
+            width:100%;
+        }
+        .search-box {
+            position:relative;
+            width:100%;
+            max-width:640px;
+        }
+        .search-box input {
+            width:100%;
+            padding: 12px 14px 12px 44px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.02);
+            color: rgba(255,255,255,0.95);
+            transition: box-shadow 150ms, transform 150ms;
+        }
+        .search-box input:focus {
+            box-shadow: 0 10px 30px rgba(139,92,246,0.06);
+            outline: none;
+            transform: translateY(-1px);
+        }
+        .search-box .search-icon {
+            position:absolute;
+            left:12px;
+            top:50%;
+            transform:translateY(-50%);
+            pointer-events:none;
+            color: rgba(255,255,255,0.65);
+            font-size: 16px;
+        }
+        .search-box .clear-icon {
+            position:absolute;
+            right:12px;
+            top:50%;
+            transform:translateY(-50%);
+            color: rgba(255,255,255,0.55);
+            cursor:pointer;
+            display:none;
+        }
+        .search-box.has-value .clear-icon { display:block; }
+
+       /* Dropdown aligned to the input: same width, centered, no weird overflow */
+.search-suggestions {
+    position: absolute;
+    top: calc(100% + 10px);           /* small gap under input */
+    left: 0;                          /* align left edge to input's left */
+    width: 100%;                      /* match input width exactly */
+    z-index: 9999;                    /* above other UI elements */
+    max-height: 320px;
+    overflow-y: auto;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(6,12,28,0.96);   /* dark, almost opaque background */
+    backdrop-filter: blur(6px);       /* subtle glass effect if desired */
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 14px 40px rgba(2,6,23,0.85);
+    padding: 8px 6px;                 /* breathing room inside dropdown */
+    box-sizing: border-box;
+}
+
+/* If you previously had a "fixed" style for mobile, keep it but override
+   only when the search-suggestions is a child of .search-box (prevents page-wide fixed) */
+@media (max-width: 991px) {
+    .search-box .search-suggestions {
+        position: fixed;              /* keeps it visible on mobile */
+        left: 16px;
+        right: 16px;
+        top: auto;
+        bottom: 16px;
+        width: auto;
+        max-height: 45vh;
+        margin: 0;
     }
+}
 
-    *{ box-sizing: border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      color: var(--muted-light);
-      background: var(--bg-1);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      line-height:1.45;
-      padding: 0;
-    }
+/* Suggestion items: clearer spacing and contrast */
+.search-suggestion-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 8px;
+    color: rgba(255,255,255,0.95);
+    background: transparent;
+    transition: background 150ms ease, transform 120ms ease;
+}
 
-    .app-wrapper { min-height:100vh; display:flex; flex-direction:row; }
+.search-suggestion-item + .search-suggestion-item {
+    margin-top: 6px; /* small gap between items for visual separation */
+}
 
-    /* Select2 text color override: make club names black in dropdown and selection */
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-      color: #000 !important;
-    }
-    .select2-container--default .select2-results__option {
-      color: #000 !important;
-    }
-    .select2-dropdown {
-      background: #fff !important;
-      color: #000 !important;
-    }
-    /* Fallback for native select element (when Select2 not applied) */
-    #event-club, #event-club option { color: #000 !important; }
+.search-suggestion-item:hover {
+    background: rgba(255,255,255,0.04); /* subtle hover contrast */
+    transform: translateY(-2px);
+}
 
-    /*  = SIDEBAR  = */
-    .sidebar {
-      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-      backdrop-filter: blur(14px) saturate(120%);
-      -webkit-backdrop-filter: blur(14px) saturate(120%);
-      border-right: 1px solid var(--glass-border);
-      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
-      color: var(--muted-light);
-      z-index: 1050;
-      transition: width 0.28s ease, transform 0.28s ease, opacity 0.28s;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding-bottom: 48px;
-      width: 250px; /* Student exact */
-      min-height: 100vh;
-    }
-    .sidebar.collapsed { width: 70px; }
+/* small tweak for titles & meta */
+.search-suggestion-item .title {
+    font-weight: 700;
+    color: #fff;
+}
+.search-suggestion-item .meta {
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+}
 
-    .sidebar .p-3 { padding-top: 28px; padding-bottom: 8px; }
+/* Prevent dropdown from growing outside the viewport horizontally */
+.search-suggestions ::-webkit-scrollbar { height: 8px; width: 8px; }
+.search-suggestions ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 8px; }
 
-    .sidebar .sidebar-title {
-      text-align: center;
-      margin-bottom: 1rem;
-      font-family: "Space Grotesk", Inter, sans-serif;
-      font-weight: 700;
-      color: white;
-      letter-spacing: -0.01em;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      text-shadow: 0 6px 20px rgba(139,92,246,0.08);
-    }
+        /* small helpers */
+        .muted-small { color: rgba(255,255,255,0.70); font-size:13px; }
+        .mb-12 { margin-bottom: 12px; }
 
-    .sidebar .nav { padding: 6px; display: flex; flex-direction: column; }
+        /* Responsive behaviour */
+        @media (max-width: 991px) {
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                transform: translateX(-110%);
+                width: 86%;
+                max-width: 360px;
+                transition: transform 240ms ease;
+                z-index: 1080;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .sidebar.collapsed { transform: translateX(-110%); }
+            .main-content { padding: 16px; }
+            .mobile-toggle { display: inline-flex; }
+            body { padding: 0; }
+            .sidebar .sidebar-title { font-size: 16px; }
+            .sidebar .nav-link span { display: inline-block; }
+            .card { margin-bottom: 14px; }
+            .table-responsive { font-size: 0.95rem; }
+            .btn-custom { width: 100%; }
+            .mobile-only-hidden { display: none !important; }
 
-    .sidebar .nav-link {
-      color: rgba(255,255,255,0.85);
-      padding: 10px 18px;
-      border-radius: 12px;
-      margin: 6px;
-      transition: transform 210ms cubic-bezier(.2,.9,.3,1), background 210ms, color 210ms, box-shadow 210ms;
-      display: flex;
-      align-items: center;
-      white-space: nowrap;
-      text-decoration: none;
-    }
-    .sidebar .nav-link i { min-width: 22px; text-align: center; font-size: 16px; filter: drop-shadow(0 4px 12px rgba(139,92,246,0.08)); }
-    .sidebar .nav-link span { margin-left: 12px; font-weight: 600; transition: opacity 180ms ease; }
-    .sidebar.collapsed .nav-link span { display: none; }
-    .sidebar.collapsed .sidebar-title { display: none; }
+            .search-suggestions { position:fixed; left: 16px; right: 16px; top: auto; bottom: 16px; max-height: 45vh; border-radius: 12px; }
+        }
 
-    .sidebar .nav-link:hover {
-      transform: translateY(-4px);
-      background: rgba(255,255,255,0.06);
-      color: white;
-      box-shadow: 0 8px 24px rgba(2,6,23,0.5);
-    }
-
-    .sidebar .nav-link.active {
-      background: linear-gradient(90deg, rgba(110,231,183,0.08), rgba(139,92,246,0.08));
-      color: white;
-      box-shadow: 0 12px 30px rgba(139,92,246,0.08);
-    }
-
-    .sidebar-toggle {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.06);
-      color: white;
-      padding: 8px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: transform 180ms;
-    }
-    .sidebar-toggle:hover { transform: translateY(-3px); }
-
-    hr { border-color: rgba(255,255,255,0.04); margin: 18px 6px; }
-
-    /*  = MAIN  = */
-    .main-content { flex: 1; min-height: 100vh; padding: 24px; transition: margin-left 0.28s ease; }
-
-    #page-title { font-family: "Space Grotesk", Inter, sans-serif; color: #ffffff; font-size: 22px; }
-    .mobile-toggle { display: none; }
-
-    .badge-custom {
-      background: linear-gradient(90deg, rgba(110,231,183,0.16), rgba(139,92,246,0.14));
-      color: white;
-      border-radius: 10px;
-      padding: 6px 10px;
-      font-weight: 700;
-      box-shadow: 0 8px 24px rgba(139,92,246,0.06);
-    }
-
-    /*  = CARDS  = */
-    .card {
-      border: 1px solid rgba(255,255,255,0.06);
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      backdrop-filter: blur(8px) saturate(120%);
-      -webkit-backdrop-filter: blur(8px) saturate(120%);
-      border-radius: var(--card-radius);
-      box-shadow: 0 6px 20px rgba(2,6,23,0.50);
-      transition: transform 220ms, box-shadow 220ms;
-    }
-    .card:hover { transform: translateY(-6px); box-shadow: var(--shadow-strong); }
-    .card .card-header { background: transparent; border-bottom: none; color: var(--muted-light); font-weight: 700; display:flex; align-items:center; gap:8px; font-family: "Space Grotesk", Inter, sans-serif; }
-    .card .card-body { color: rgba(255,255,255,0.92); }
-
-    .stats-card { background: linear-gradient(135deg, rgba(110,231,183,0.08), rgba(139,92,246,0.06)); color: white; border: 1px solid rgba(255,255,255,0.06); }
-    .stats-card i { filter: drop-shadow(0 6px 18px rgba(139,92,246,0.08)); }
-
-    /*  = SEARCH BAR (EXACT STUDENT UI)  = */
-    .search-area { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px; justify-content:center; width:100%; }
-    .search-box { position:relative; width:100%; max-width:640px; }
-    .search-box input {
-      width:100%;
-      padding: 12px 14px 12px 44px; /* space for left icon */
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.02);
-      color: rgba(255,255,255,0.95);
-      transition: box-shadow 150ms, transform 150ms;
-    }
-    .search-box input:focus { box-shadow: 0 10px 30px rgba(139,92,246,0.06); outline: none; transform: translateY(-1px); }
-    .search-box .search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); pointer-events:none; color: rgba(255,255,255,0.65); font-size: 16px; }
-    .search-box .clear-icon { position:absolute; right:12px; top:50%; transform:translateY(-50%); color: rgba(255,255,255,0.55); cursor:pointer; display:none; }
-    .search-box.has-value .clear-icon { display:block; }
-
-    /* suggestions dropdown EXACT */
-    .search-suggestions {
-      position: absolute;
-      top: calc(100% + 10px);
-      left: 0;
-      width: 100%;
-      z-index: 9999;
-      max-height: 320px;
-      overflow-y: auto;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(6,12,28,0.96);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      box-shadow: 0 14px 40px rgba(2,6,23,0.85);
-      padding: 8px 6px;
-      box-sizing: border-box;
-    }
-    @media (max-width: 991px) {
-      .search-box .search-suggestions {
-        position: fixed; left: 16px; right: 16px; top: auto; bottom: 16px; width: auto; max-height: 45vh; margin: 0; border-radius: 12px;
-      }
-    }
-    .search-suggestion-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px; cursor: pointer; border-radius: 8px; color: rgba(255,255,255,0.95); background: transparent; transition: background 150ms ease, transform 120ms ease; }
-    .search-suggestion-item + .search-suggestion-item { margin-top: 6px; }
-    .search-suggestion-item:hover { background: rgba(255,255,255,0.04); transform: translateY(-2px); }
-    .search-suggestion-item .title { font-weight: 700; color: #fff; }
-    .search-suggestion-item .meta { color: rgba(255,255,255,0.7); font-size: 13px; }
-    .search-suggestions ::-webkit-scrollbar { height: 8px; width: 8px; }
-    .search-suggestions ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 8px; }
-
-    /*  = TABLES / FORMS  = */
-  /* ===== FIX: make table text visible ===== */
+        /* Accessibility focus */
+        a.nav-link:focus, button:focus, input:focus {
+            outline: 2px dashed rgba(110,231,183,0.22);
+            outline-offset: 3px;
+        }
+/* ===== FIX: make table text visible ===== */
 table.table tbody tr td, 
 table.table thead th {
   color: rgba(255, 255, 255, 0.95) !important;
@@ -235,115 +428,317 @@ table.table tbody tr:hover td {
   color: rgba(255, 255, 255, 0.95) !important;
 }
 
+body, 
+.sidebar, 
+.card, 
+.stat-glass, 
+.search-suggestions, 
+h1, h2, h3, h4, h5, h6, 
+p, span, label, a, td, th, 
+.nav-link, 
+.badge-custom {
+    color: #ffffff !important;  /* Force white text */
+}
 
-    .form-control, .form-select {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.06);
-      color: rgba(255,255,255,0.95);
-      border-radius: 8px;
-      padding: 10px 12px;
-      transition: box-shadow 120ms, border-color 120ms;
-    }
-    .form-control:focus, .form-select:focus { outline: none; box-shadow: 0 8px 30px rgba(139,92,246,0.06); border-color: rgba(139,92,246,0.45); }
-    label.form-label { color: rgba(255,255,255,0.85); font-weight:600; }
+/* for black text inside buttons or small areas */
+button, input, select, textarea {
+    color: #ffffff !important;
+}
 
-    .btn-custom {
-      background: linear-gradient(90deg, rgba(110,231,183,0.18), rgba(139,92,246,0.16));
-      border: 1px solid rgba(255,255,255,0.08);
-      color: white;
-      padding: 8px 18px;
-      border-radius: 10px;
-      font-weight: 700;
-      transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms;
-      box-shadow: 0 8px 22px rgba(139,92,246,0.06);
-    }
-    .btn-custom:hover { transform: translateY(-3px); box-shadow: 0 22px 60px rgba(139,92,246,0.10); opacity: 0.98; color: white; }
-    .btn-custom:active { transform: translateY(0); }
+/* badges (they were black before) */
+.badge-gold,
+.badge-silver,
+.badge-bronze {
+    color: #000 !important; /* keep dark for contrast on bright gold/silver bg */
+}
 
-    .btn-outline-success { color: rgba(255,255,255,0.9); border-color: rgba(255,255,255,0.06); background: transparent; }
-    .btn-outline-success:hover { background: rgba(255,255,255,0.03); color: white; }
+/* Optional: slightly softer text for readability */
+p, span, .muted-small {
+    color: rgba(255,255,255,0.88) !important;
+}
+/* === Fix invisible event detail text === */
+.event-details,
+.event-info,
+.card-body small,
+.text-muted,
+p,
+span {
+  color: rgba(255, 255, 255, 0.85) !important; /* soft white for readability */
+}
 
-    .progress { height: 10px; background: rgba(255,255,255,0.04); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.03); }
-    .progress .progress-bar { background: linear-gradient(90deg, rgba(110,231,183,0.9), rgba(139,92,246,0.9)); box-shadow: 0 6px 18px rgba(139,92,246,0.06) inset; }
+/* if your event metadata uses icons */
+.event-details i,
+.event-info i {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
 
-    .mobile-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(2,6,23,0.6); z-index: 999; transition: opacity 180ms; }
-    .mobile-overlay.active { display:block; }
+/* if date/time info is wrapped in <small> tags */
+small {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+/*   ===
+   🌟 FINAL FIX — Visible Text in Tables & Forms
+     === */
 
-    /* ACCESSIBILITY */
-    a.nav-link:focus, button:focus, input:focus { outline: 2px dashed rgba(110,231,183,0.22); outline-offset: 3px; }
+/* 🧊 Fix table text and header visibility */
+.table th,
+.table td {
+  color: rgba(255, 255, 255, 0.95) !important;
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
 
-    /* BADGES */
-    .badge-gold { background: linear-gradient(90deg,#FFD700,#F9D342); color:#000; }
-    .badge-silver { background: linear-gradient(90deg,#C0C0C0,#E0E0E0); color:#000; }
-    .badge-bronze { background: linear-gradient(90deg,#CD7F32,#D9A174); color:#000; }
+.table-hover tbody tr:hover td {
+  background-color: rgba(255, 255, 255, 0.10) !important;
+  color: #ffffff !important;
+}
 
-    /* TEXT COLOR FIX (like student) */
-    body, .sidebar, .card, h1,h2,h3,h4,h5,h6, p, span, label, a, td, th, .nav-link, .badge-custom { color: #ffffff !important; }
-    p, span, .text-muted { color: rgba(255,255,255,0.88) !important; }
-    small { color: rgba(255,255,255,0.80) !important; }
-    
-    /* Form Select Dropdown Color Fix */
-    .form-select option {
-      background-color: white;
-      color: black !important;
-    }
-    .form-select {
-      color: white !important;
-    }
+.table .text-muted,
+.text-muted {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
 
-    /* RESPONSIVE */
-    @media (max-width: 991px) {
-      .sidebar{ position: fixed; left: 0; top: 0; bottom: 0; transform: translateX(-110%); width: 86%; max-width: 360px; transition: transform 240ms ease; z-index: 1080; }
-      .sidebar.mobile-open { transform: translateX(0); }
-      .sidebar.collapsed { transform: translateX(-110%); }
-      .main-content { padding: 16px; }
-      .mobile-toggle { display: inline-flex; }
-      body { padding: 0; }
-      .sidebar .sidebar-title { font-size: 16px; }
-      .sidebar .nav-link span { display: inline-block; }
-      .card { margin-bottom: 14px; }
-      .table-responsive { font-size: 0.95rem; }
-      .btn-custom { width: 100%; }
-      .mobile-only-hidden { display: none !important; }
-    }
-  </style>
+.table-light td,
+.table-light th {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* 💬 Fix Profile Page Inputs (white-on-white issue) */
+.form-label {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600;
+}
+
+.form-control {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 10px;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-control:focus {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
+  outline: none;
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Fix Save Profile button contrast */
+.btn-custom,
+button[type="submit"] {
+  background: linear-gradient(90deg, rgba(110,231,183,0.2), rgba(139,92,246,0.2));
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-custom:hover,
+button[type="submit"]:hover {
+  background: linear-gradient(90deg, rgba(110,231,183,0.3), rgba(139,92,246,0.3));
+  transform: translateY(-2px);
+}
+/*   ===
+   🚀 ULTIMATE FIX for first two black cells
+     === */
+
+/* Force every cell (even first & second) to show white text */
+.table td:first-child,
+.table td:nth-child(2),
+.table th:first-child,
+.table th:nth-child(2) {
+  color: #ffffff !important;
+}
+
+/* Add subtle glass dark background so white text stays visible */
+.table td:first-child,
+.table td:nth-child(2) {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Make sure hover also keeps white text for those cells */
+.table-hover tbody tr:hover td:first-child,
+.table-hover tbody tr:hover td:nth-child(2) {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+/* Bonus — ensure entire table never reverts to black text */
+.table,
+.table * {
+  color: #ffffff !important;
+}
+/* ===== TOP TRANSPARENT NAVBAR ===== */
+.top-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  z-index: 1200;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.4);
+}
+
+/* Title */
+.portal-title {
+  font-family: "Space Grotesk", Inter, sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+/* Clubs Button */
+.clubs-btn {
+  background: linear-gradient(90deg, rgba(110,231,183,0.15), rgba(139,92,246,0.15));
+  border: 1px solid rgba(255,255,255,0.1);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.clubs-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(90deg, rgba(110,231,183,0.25), rgba(139,92,246,0.25));
+}
+
+.app-wrapper {
+  padding-top: 60px; /* space for top navbar */
+}
+
+.portal-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.8);
+  font-weight: 700;
+  font-size: 15px;
+  margin-right: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  transition: 0.2s;
+}
+
+.portal-btn:hover {
+  color: white;
+  background: rgba(255,255,255,0.08);
+}
+
+.portal-btn.active {
+  background: linear-gradient(90deg, rgba(110,231,183,0.2), rgba(139,92,246,0.2));
+  color: white;
+}
+
+
+    </style>
 </head>
-
 <body>
-  <!-- Mobile Overlay -->
-  <div id="mobileOverlay" class="mobile-overlay" onclick="toggleMobileSidebar()"></div>
+  <!-- TOP TRANSPARENT NAVBAR -->
+<nav class="top-navbar">
+  <div class="top-nav-left">
+    <button id="student-portal-btn" class="clubs-btn portal-btn active" onclick="switchPortal('student')">
+      Student Portal
+    </button>
+  </div>
 
-  <div class="app-wrapper">
-    <!--  = SIDEBAR  = -->
-    <aside id="sidebar" class="sidebar" aria-label="Main sidebar">
-      <div class="p-3">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h4 class="sidebar-title mb-0">
-            <i class="fas fa-user-shield me-2"></i>
-            Admin Portal
-          </h4>
-          <button id="collapseBtn" class="sidebar-toggle d-none d-lg-inline-flex" aria-label="Toggle sidebar" onclick="toggleSidebar()">
-            <i class="fas fa-bars"></i>
-          </button>
-          <button class="sidebar-toggle d-inline-flex d-lg-none" onclick="toggleMobileSidebar()" aria-label="Close sidebar">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
+  <div class="top-nav-right">
+    <button id="admin-portal-btn" class="clubs-btn portal-btn" onclick="switchPortal('admin')">
+      Clubs & Activities
+    </button>
+  </div>
+</nav>
 
-        <nav class="nav flex-column" aria-label="Primary">
-          <a class="nav-link active" href="#dashboard" data-section="dashboard" onclick="showSection(event, 'dashboard')">
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileSidebar()"></div>
+
+    <div class="app-wrapper">
+        <!-- Sidebar (desktop and mobile) -->
+        <nav class="sidebar" id="sidebar" aria-label="Main sidebar">
+            <div class="p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="sidebar-title mb-0">
+                        <i class="fas fa-user-graduate me-2"></i>
+                        Student Portal
+                    </h4>
+                    <!-- Desktop collapse button -->
+                    <button class="sidebar-toggle d-none d-lg-inline-flex" id="collapseBtn" aria-label="Toggle sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <!-- Mobile close button -->
+                    <button class="sidebar-toggle d-inline-flex d-lg-none" onclick="toggleMobileSidebar()" aria-label="Close sidebar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <nav class="nav flex-column" aria-label="Primary">
+                    <a class="nav-link active" href="#dashboard" data-section="dashboard" onclick="showSection(event, 'dashboard')">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a class="nav-link" href="#events" data-section="events" onclick="showSection(event, 'events')">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>All Events</span>
+                    </a>
+                    <a class="nav-link" href="#my-events" data-section="my-events" onclick="showSection(event, 'my-events')">
+                        <i class="fas fa-bookmark"></i>
+                        <span>Registered and <br>History</span>
+                    </a>
+                    <a class="nav-link" href="#certificates" data-section="certificates" onclick="showSection(event, 'certificates')">
+                        <i class="fas fa-certificate"></i>
+                        <span>Certificates</span>
+                    </a>
+                    <a class="nav-link" href="#leaderboard" data-section="leaderboard" onclick="showSection(event, 'leaderboard')">
+                        <i class="fas fa-trophy"></i>
+                        <span>Leaderboard</span>
+                    </a>
+                    <a class="nav-link" href="#profile" data-section="profile" onclick="showSection(event, 'profile')">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                    <hr class="my-3">
+                    <a class="nav-link" href="#" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </nav>
+            </div>
+        </nav>
+
+        <!-- ADMIN SIDEBAR -->
+<nav class="sidebar" id="adminSidebar" style="display:none;">
+  <div class="p-3">
+    <h4 class="sidebar-title">
+      <i class="fas fa-user-shield me-2"></i>
+      Clubs & Activities
+    </h4>
+
+    <nav class="nav flex-column" aria-label="Primary">
+          <a class="nav-link active" href="#admin-dashboard" data-section="admin-dashboard" onclick="showSection(event, 'admin-dashboard')">
             <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
           </a>
-          <a class="nav-link" href="#events" data-section="events" onclick="showSection(event, 'events')">
+          <a class="nav-link" href="#admin-events" data-section="admin-events" onclick="showSection(event, 'admin-events')">
             <i class="fas fa-calendar-alt"></i><span>My Events</span>
           </a>
-          <a class="nav-link" href="#create-event" data-section="create-event" onclick="showSection(event, 'create-event')">
-            <i class="fas fa-plus-circle"></i><span>Create Event</span>
+          
           </a>
           <a class="nav-link" href="#participants" data-section="participants" onclick="showSection(event, 'participants')">
             <i class="fas fa-users"></i><span>Participants</span>
           </a>
-          <a class="nav-link" href="#certificates" data-section="certificates" onclick="showSection(event, 'certificates')">
+          <a class="nav-link" href="#admin-certificates" data-section="admin-certificates" onclick="showSection(event, 'admin-certificates')">
             <i class="fas fa-certificate"></i><span>Certificates</span>
           </a>
           <a class="nav-link" href="#students" data-section="students" onclick="showSection(event, 'students')">
@@ -354,40 +749,286 @@ table.table tbody tr:hover td {
             <i class="fas fa-sign-out-alt"></i><span>Logout</span>
           </a>
         </nav>
-      </div>
-    </aside>
+  </div>
+</nav>
 
-    <!--  = MAIN  = -->
-    <main id="mainContent" class="main-content" role="main" aria-live="polite">
-      <!-- HEADER row: left = title, center = search (EXACT like student), right = user badge -->
-      <div class="row align-items-center mb-4 gx-3">
-        <div class="col-12 col-lg-4 d-flex align-items-center mb-2 mb-lg-0">
-          <button class="mobile-toggle btn btn-custom me-3 d-inline-flex d-lg-none" onclick="toggleMobileSidebar()" aria-label="Open sidebar">
-            <i class="fas fa-bars"></i>
-          </button>
-          <h2 id="page-title" class="mb-0">Dashboard</h2>
-        </div>
 
-        <div class="col-12 col-lg-4 d-flex justify-content-center">
-          <!-- CENTER SEARCH — EXACT SAME MARKUP/CLASSES -->
-          <div class="search-area w-100">
-            <div class="search-box" id="searchBox" role="search" aria-label="Search events">
-              <span class="search-icon"><i class="fas fa-search"></i></span>
-              <input id="searchInput" type="search" placeholder="Search workshops or events..." aria-label="Search events" autocomplete="off">
-              <span class="clear-icon" id="clearSearch" title="Clear search"><i class="fas fa-times"></i></span>
-              <div id="searchSuggestions" class="search-suggestions" style="display:none;" role="listbox" aria-label="Search suggestions"></div>
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent" role="main" aria-live="polite">
+            <!-- Header row: left = title, center = search, right = user -->
+            <div class="row align-items-center mb-4 gx-3">
+                <div class="col-12 col-lg-4 d-flex align-items-center mb-2 mb-lg-0">
+                    <button class="mobile-toggle btn btn-custom me-3 d-inline-flex d-lg-none" onclick="toggleMobileSidebar()" aria-label="Open sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 id="page-title" class="mb-0">Dashboard</h2>
+                </div>
+
+                <div class="col-12 col-lg-4 d-flex justify-content-center">
+                    <!-- center search -->
+                    <div class="search-area w-100">
+                        <div class="search-box" id="searchBox" role="search" aria-label="Search events and workshops">
+                            <span class="search-icon"><i class="fas fa-search"></i></span>
+                            <input id="searchInput" type="search" placeholder="Search workshops or events..." aria-label="Search events or workshops" autocomplete="off">
+                            <span class="clear-icon" id="clearSearch" title="Clear search"><i class="fas fa-times"></i></span>
+
+                            <!-- suggestions dropdown -->
+                            <div id="searchSuggestions" class="search-suggestions" style="display:none;" role="listbox" aria-label="Search suggestions"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-4 d-flex justify-content-lg-end align-items-center">
+                    <span class="me-3 d-none d-md-block">Welcome, <span id="user-name">Student</span></span>
+                    <div class="badge badge-custom fs-6" id="user-points" aria-live="polite">0 Points</div>
+                </div>
             </div>
-          </div>
-        </div>
 
-        <div class="col-12 col-lg-4 d-flex justify-content-lg-end align-items-center">
-          <span class="me-3 d-none d-md-block">Welcome, <span id="user-name">Admin</span></span>
-          <div class="badge badge-custom fs-6" aria-live="polite">Admin</div>
-        </div>
-      </div>
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="content-section">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+                    <div>
+                        <h4 class="mb-0" style="font-weight:700; color: #fff;">Overview</h4>
+                        <div class="muted-small">Quick stats and upcoming events</div>
+                    </div>
+                    <!-- note: search is now in the header (center) -->
+                </div>
 
-      <!-- DASHBOARD SECTION -->
-      <section id="dashboard-section" class="content-section">
+                <!-- Redesigned Stats Cards -->
+                <div class="dashboard-stats-wrap mb-4">
+                    <div class="stat-glass stat-mint" role="region" aria-label="Total Events">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="stat-left">
+                                <div class="icon-wrap">
+                                    <i class="fas fa-calendar-check fa-lg"></i>
+                                </div>
+                                <div class="meta">
+                                    <div class="label">Total Events</div>
+                                    <div id="total-events" class="value count-animate">0</div>
+                                </div>
+                            </div>
+                            <div class="text-end muted-small">All upcoming & past</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-glass stat-violet" role="region" aria-label="Registered events">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="stat-left">
+                                <div class="icon-wrap">
+                                    <i class="fas fa-bookmark fa-lg"></i>
+                                </div>
+                                <div class="meta">
+                                    <div class="label">Registered</div>
+                                    <div id="registered-events" class="value count-animate">0</div>
+                                </div>
+                            </div>
+                            <div class="text-end muted-small">Your registrations</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-glass stat-gold" role="region" aria-label="Certificates count">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="stat-left">
+                                <div class="icon-wrap">
+                                    <i class="fas fa-certificate fa-lg"></i>
+                                </div>
+                                <div class="meta">
+                                    <div class="label">Certificates</div>
+                                    <div id="certificates-count" class="value count-animate">0</div>
+                                </div>
+                            </div>
+                            <div class="text-end muted-small">Earned so far</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-glass stat-rose" role="region" aria-label="User rank">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="stat-left">
+                                <div class="icon-wrap">
+                                    <i class="fas fa-trophy fa-lg"></i>
+                                </div>
+                                <div class="meta">
+                                    <div class="label">Rank</div>
+                                    <div id="user-rank" class="value count-animate">-</div>
+                                </div>
+                            </div>
+                            <div class="text-end muted-small">Leaderboard position</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming + Quick Stats (unchanged structure, just integrated) -->
+                <div class="row gx-3">
+                    <div class="col-12 col-lg-8">
+                        <div class="card p-3 mb-3">
+                            <div class="card-header p-0 mb-2">
+                                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Upcoming Events</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div id="upcoming-events" class="p-2">
+                                    <div class="text-center py-3">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-4">
+                        <div class="card p-3 mb-3">
+                            <div class="card-header p-0 mb-2">
+                                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Quick Stats</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="p-2">
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="small">Events Attended</span>
+                                            <span id="attended-count">0</span>
+                                        </div>
+                                        <div class="progress mt-1">
+                                            <div class="progress-bar" role="progressbar" style="width: 0%" id="attended-progress"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="small">Certificates Earned</span>
+                                            <span id="certificates-earned">0</span>
+                                        </div>
+                                        <div class="progress mt-1">
+                                            <div class="progress-bar" role="progressbar" style="width: 0%" id="certificates-progress"></div>
+                                        </div>
+                                    </div>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-custom" onclick="showSection(null,'events')">Browse Events</button>
+                                        <button class="btn btn-outline-light" onclick="showSection(null,'certificates')">View Certificates</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Events Section -->
+            <section id="events-section" class="content-section" style="display:none;">
+                <div class="card p-3">
+                    <div class="card-header p-0 mb-2 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>All Events</h5>
+                        
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="all-events" class="p-2">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- My Events Section -->
+            <section id="my-events-section" class="content-section" style="display:none;">
+                <div class="card p-3">
+                    <div class="card-header p-0 mb-2">
+                        <h5 class="mb-0"><i class="fas fa-bookmark me-2"></i>Registered and History</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="my-events" class="p-2">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Certificates Section -->
+            <section id="certificates-section" class="content-section" style="display:none;">
+                <div class="card p-3">
+                    <div class="card-header p-0 mb-2">
+                        <h5 class="mb-0"><i class="fas fa-certificate me-2"></i>My Certificates</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="certificates" class="p-2">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Leaderboard Section -->
+            <section id="leaderboard-section" class="content-section" style="display:none;">
+                <div class="card p-3">
+                    <div class="card-header p-0 mb-2">
+                        <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Student Leaderboard</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="leaderboard" class="p-2">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Section (added) -->
+            <section id="profile-section" class="content-section" style="display:none;">
+                <div class="card profile-card p-3">
+                    <div class="card-header p-0 mb-2">
+                        <h5 class="mb-0"><i class="fas fa-user me-2"></i>Profile</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-3">
+                            <form id="profile-form" class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label for="profile-name" class="form-label">Full Name</label>
+                                    <input id="profile-name" name="name" class="form-control" required />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="profile-email" class="form-label">Email</label>
+                                    <input id="profile-email" name="email" type="email" class="form-control" required />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="profile-phone" class="form-label">Phone</label>
+                                    <input id="profile-phone" name="phone" class="form-control" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="profile-department" class="form-label">Department</label>
+                                    <input id="profile-department" name="department" class="form-control" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label for="profile-year" class="form-label">Year</label>
+                                    <input id="profile-year" name="year" class="form-control" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label for="profile-student-id" class="form-label">Student ID</label>
+                                    <input id="profile-student-id" name="studentId" class="form-control" readonly />
+                                </div>
+                                <div class="col-12 col-md-4 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-custom w-100">Save Profile</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DASHBOARD SECTION -->
+      <section id="admin-dashboard-section" class="content-section">
         <div class="row mb-4">
           <div class="col-md-3">
             <div class="card stats-card">
@@ -452,13 +1093,11 @@ table.table tbody tr:hover td {
               </div>
               <div class="card-body">
                 <div class="d-grid gap-2">
-                  <button class="btn btn-custom" onclick="navigateToSection('create-event')">
-                    <i class="fas fa-plus me-2"></i>Create New Event
-                  </button>
+                  
                   <button class="btn btn-outline-success" onclick="navigateToSection('participants')">
                     <i class="fas fa-users me-2"></i>View Participants
                   </button>
-                  <button class="btn btn-outline-success" onclick="navigateToSection('certificates')">
+                  <button class="btn btn-outline-success" onclick="navigateToSection('admin-certificates')">
                     <i class="fas fa-certificate me-2"></i>Manage Certificates
                   </button>
                 </div>
@@ -469,7 +1108,7 @@ table.table tbody tr:hover td {
       </section>
 
       <!-- EVENTS SECTION -->
-      <section id="events-section" class="content-section" style="display:none;">
+      <section id="admin-events-section" class="content-section" style="display:none;">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>My Events</h5>
@@ -491,77 +1130,7 @@ table.table tbody tr:hover td {
         </div>
       </section>
 
-      <!-- CREATE EVENT SECTION (same layout as your previous admin) -->
-      <section id="create-event-section" class="content-section" style="display:none;">
-        <div class="card">
-          <div class="card-header">
-            <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Create New Event</h5>
-          </div>
-          <div class="card-body">
-            <form id="create-event-form">
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label for="event-title" class="form-label">Event Title</label>
-                    <input type="text" class="form-control" id="event-title" name="title" required>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label for="event-venue" class="form-label">Venue</label>
-                    <input type="text" class="form-control" id="event-venue" name="venue" required>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label for="event-date" class="form-label">Date</label>
-                    <input type="date" class="form-control" id="event-date" name="date" required>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label for="event-time" class="form-label">Time</label>
-                    <input type="time" class="form-control" id="event-time" name="time" required>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label for="event-max-participants" class="form-label">Max Participants</label>
-                    <input type="number" class="form-control" id="event-max-participants" name="maxParticipants" value="100">
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label for="event-points" class="form-label">Points</label>
-                    <input type="number" class="form-control" id="event-points" name="points" value="10">
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label for="event-club" class="form-label">Select Club</label>
-                    <select class="form-control" id="event-club" name="club" required>
-                      <option></option>
-                    </select>
-                    <input type="hidden" id="event-club-name" name="clubName">
-                  </div>
-                </div>
-                <div class="col-12">
-                  <div class="mb-3">
-                    <label for="event-description" class="form-label">Description</label>
-                    <textarea class="form-control" id="event-description" name="description" rows="4" required></textarea>
-                  </div>
-                </div>
-              </div>
-              <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-custom">
-                  <i class="fas fa-save me-2"></i>Create Event
-                </button>
-                <button type="button" class="btn btn-outline-secondary" onclick="showSection(event, 'events')">Cancel</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </section>
+     
 
       <!-- PARTICIPANTS SECTION -->
       <section id="participants-section" class="content-section" style="display:none;">
@@ -591,7 +1160,7 @@ table.table tbody tr:hover td {
       </section>
 
       <!-- CERTIFICATES SECTION -->
-      <section id="certificates-section" class="content-section" style="display:none;">
+      <section id="admin-certificates-section" class="content-section" style="display:none;">
         <div class="card">
           <div class="card-header">
             <h5 class="mb-0"><i class="fas fa-certificate me-2"></i>Upload Certificates</h5>
@@ -688,44 +1257,113 @@ table.table tbody tr:hover td {
     </div>
   </div>
 
-  <!-- Dependencies: jQuery, Select2, Bootstrap JS -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script>
+
+
+           
+
+
+
+
+            <!-- small footer -->
+            <div class="mt-4 text-center text-muted small">© Club Event System</div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
 /***********************************************************************
- * ADMIN DASHBOARD — UI / INTERACTIVITY ONLY VERSION
+ * STUDENT DASHBOARD — UI / INTERACTIVITY ONLY VERSION
  *   NO BACKEND LOGIC
  *   NO API CALLS
  *   UI BEHAVIOUR PRESERVED
  ***********************************************************************/
+let currentMode = "student";
 
+function switchPortal(mode) {
+  currentMode = mode;
+
+  const studentSidebar = document.getElementById("sidebar");
+  const adminSidebar = document.getElementById("adminSidebar");
+
+  // Show/hide sidebars
+  if (mode === "student") {
+    studentSidebar.style.display = "block";
+    adminSidebar.style.display = "none";
+    showSection(null, "dashboard");
+  } else {
+    studentSidebar.style.display = "none";
+    adminSidebar.style.display = "block";
+    showSection(null, "admin-dashboard");
+  }
+
+  // Highlight buttons
+  document.querySelectorAll(".portal-btn").forEach(btn => btn.classList.remove("active"));
+  document.getElementById(mode + "-portal-btn")?.classList.add("active");
+}
+
+
+
+function checkAdminStatus(user) {
+  const adminBtn = document.getElementById("admin-portal-btn");
+
+  if (!user) return;
+
+  const isAdmin = Boolean(user.is_admin);
+
+  console.log("ADMIN STATUS:", isAdmin); // debug
+
+  if (adminBtn) {
+    adminBtn.style.display = isAdmin ? "inline-block" : "none";
+  }
+
+  if (!isAdmin) {
+    switchPortal("student");
+  }
+}
+
+
+
+
+let currentUser = null;
 let currentSearchQuery = '';
+
 const sidebarEl = document.getElementById('sidebar');
 const mobileOverlay = document.getElementById('mobileOverlay');
 
 /*   SIDEBAR / MOBILE   */
-function toggleSidebar(){
+function toggleSidebar() {
   if (!sidebarEl) return;
   sidebarEl.classList.toggle('collapsed');
 }
 
-function toggleMobileSidebar(){
+function toggleMobileSidebar() {
   if (!sidebarEl || !mobileOverlay) return;
   sidebarEl.classList.toggle('mobile-open');
   mobileOverlay.classList.toggle('active');
 }
 
-if (mobileOverlay){
-  mobileOverlay.addEventListener('click', ()=>{
+(function wireCollapseBtn() {
+  const collapseBtn = document.getElementById('collapseBtn');
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      toggleSidebar();
+    });
+  }
+})();
+
+if (mobileOverlay) {
+  mobileOverlay.addEventListener('click', () => {
     sidebarEl.classList.remove('mobile-open');
     mobileOverlay.classList.remove('active');
   });
 }
 
 /*   NAVIGATION (UI ONLY)   */
-function showSection(event, section){
+function showSection(event, section) {
   if (event && typeof event.preventDefault === 'function') event.preventDefault();
 
   document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
@@ -736,68 +1374,104 @@ function showSection(event, section){
 
   let link = null;
   if (event && event.currentTarget) link = event.currentTarget.closest('.nav-link');
-  if (!link) link = document.querySelector(`.nav-link[data-section="${section}"]`) || document.querySelector(`.nav-link[href="#${section}"]`);
+  if (!link) link = document.querySelector(`.nav-link[data-section="${section}"]`);
   if (link) link.classList.add('active');
 
-  if (sidebarEl && sidebarEl.classList.contains('mobile-open')){
+  if (sidebarEl && sidebarEl.classList.contains('mobile-open')) {
     sidebarEl.classList.remove('mobile-open');
-    if (mobileOverlay) mobileOverlay.classList.remove('active');
+    mobileOverlay.classList.remove('active');
   }
 
   const titles = {
-    'dashboard':'Dashboard',
-    'events':'My Events',
-    'create-event':'Create Event',
-    'participants':'Participants',
-    'certificates':'Certificates',
-    'students':'Students'
+    'dashboard': 'Dashboard',
+    'events': 'All Events',
+    'my-events': 'My Events',
+    'certificates': 'Certificates',
+    'leaderboard': 'Leaderboard',
+    'profile': 'Profile'
   };
   const pageTitleEl = document.getElementById('page-title');
   if (pageTitleEl) pageTitleEl.textContent = titles[section] || 'Dashboard';
 }
 
-function navigateToSection(section){
-  document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+/*   LOGOUT   */
+function logout() {
+  localStorage.removeItem('user');
+  window.location.href = 'student-login.html';
+}
 
-  const el = document.getElementById(`${section}-section`);
-  if (el) el.style.display = 'block';
-
-  const navLink = document.querySelector(`.nav-link[href="#${section}"]`) || document.querySelector(`.nav-link[data-section="${section}"]`);
-  if (navLink) navLink.classList.add('active');
-
-  const pageTitleEl = document.getElementById('page-title');
-  if (pageTitleEl && section === 'create-event') pageTitleEl.textContent = 'Create Event';
-
-  if (sidebarEl && sidebarEl.classList.contains('mobile-open')){
-    sidebarEl.classList.remove('mobile-open');
-    if (mobileOverlay) mobileOverlay.classList.remove('active');
+/*   SEARCH UI ONLY   */
+function clearSearchSuggestions() {
+  const suggestionsEl = document.getElementById('searchSuggestions');
+  if (suggestionsEl) {
+    suggestionsEl.style.display = 'none';
+    suggestionsEl.innerHTML = '';
   }
 }
 
-/*   LOGOUT (UI ONLY)   */
-function logout(){
-  localStorage.removeItem('user');
-  localStorage.removeItem('loginType');
-  window.location.href = 'admin-login.html';
+function setupSearchUI() {
+  const input = document.getElementById('searchInput');
+  const clearBtn = document.getElementById('clearSearch');
+  const searchBox = document.getElementById('searchBox');
+
+  function debounce(fn, wait) {
+    let t = null;
+    return function(...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), wait);
+    };
+  }
+
+  const onSearchChange = debounce((val) => {
+    currentSearchQuery = (val || '').trim();
+    if (searchBox) {
+      if (currentSearchQuery) searchBox.classList.add('has-value');
+      else searchBox.classList.remove('has-value');
+    }
+  }, 250);
+
+  if (input) {
+    input.addEventListener('input', (e) => onSearchChange(e.target.value));
+    input.addEventListener('blur', () => {
+      setTimeout(() => clearSearchSuggestions(), 200);
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      if (input) {
+        input.value = '';
+        input.dispatchEvent(new Event('input'));
+      }
+      currentSearchQuery = '';
+      clearSearchSuggestions();
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    const box = document.getElementById('searchBox');
+    if (box && !box.contains(e.target)) clearSearchSuggestions();
+  });
 }
 
 /*   UI HELPERS   */
-function formatDate(d){
-  try{
+function formatDate(d) {
+  try {
     if (!d) return '-';
     const date = new Date(d);
     return date.toLocaleDateString();
-  }catch(e){ return d; }
+  } catch (e) {
+    return d;
+  }
 }
 
-function truncateText(s,n){
+function truncateText(s, n) {
   if (!s) return '';
-  return s.length > n ? s.slice(0,n-1) + '…' : s;
+  return s.length > n ? s.slice(0, n - 1) + '…' : s;
 }
 
-function escapeHtml(unsafe){
-  if (unsafe===null || unsafe===undefined) return '';
+function escapeHtml(unsafe) {
+  if (unsafe === null || unsafe === undefined) return '';
   return String(unsafe)
     .replaceAll('&','&amp;')
     .replaceAll('<','&lt;')
@@ -806,80 +1480,308 @@ function escapeHtml(unsafe){
     .replaceAll("'",'&#039;');
 }
 
-/*   SEARCH UI (NO DATA LOGIC)   */
-function clearSearchSuggestions(){
-  const suggestionsEl = document.getElementById('searchSuggestions');
-  if (suggestionsEl){
-    suggestionsEl.style.display='none';
-    suggestionsEl.innerHTML='';
-  }
-}
-
-function setupSearchUI(){
-  const input = document.getElementById('searchInput');
-  const clearBtn = document.getElementById('clearSearch');
-  const searchBox = document.getElementById('searchBox');
-
-  function debounce(fn, wait){
-    let t=null;
-    return function(...args){
-      clearTimeout(t);
-      t = setTimeout(()=>fn.apply(this,args), wait);
-    };
-  }
-
-  const onSearchChange = debounce((val)=>{
-    currentSearchQuery = (val || '').trim();
-    if (searchBox){
-      if (currentSearchQuery) searchBox.classList.add('has-value');
-      else searchBox.classList.remove('has-value');
-    }
-  }, 250);
-
-  if (input){
-    input.addEventListener('input', (e)=> onSearchChange(e.target.value));
-    input.addEventListener('blur', ()=>{ setTimeout(()=> clearSearchSuggestions(), 200); });
-  }
-
-  if (clearBtn){
-    clearBtn.addEventListener('click', ()=>{
-      if (input){
-        input.value='';
-        input.dispatchEvent(new Event('input'));
-      }
-      currentSearchQuery = '';
-      clearSearchSuggestions();
-    });
-  }
-
-  document.addEventListener('click', (e)=>{
-    const box = document.getElementById('searchBox');
-    if (box && !box.contains(e.target)) clearSearchSuggestions();
-  });
+function escapeAttr(unsafe) {
+  if (unsafe === null || unsafe === undefined) return '#';
+  return String(unsafe).replaceAll('"','%22').replaceAll("'",'%27');
 }
 
 /*   INIT (UI ONLY)   */
-window.addEventListener('load', function(){
-  let currentUser = null;
+window.addEventListener('load', function() {
+  try {
+    let user = null;
 
-  try{
-    currentUser = JSON.parse(localStorage.getItem('user'));
-  }catch(e){
-    currentUser = null;
+    try {
+      user = JSON.parse(localStorage.getItem('user'));
+    } catch (e) {
+      user = null;
+    }
+
+    if (!user) {
+      window.location.href = 'student-login.html';
+      return;
+    }
+
+    currentUser = user;
+    user.is_admin = true;
+    checkAdminStatus(user);
+
+    const userNameEl = document.getElementById('user-name');
+    const userPointsEl = document.getElementById('user-points');
+
+    if (userNameEl) userNameEl.textContent = user.name || 'Student';
+    if (userPointsEl) userPointsEl.textContent = (user.points ?? 0) + " Points";
+
+    setupSearchUI();
+    showSection(null, 'dashboard');
+
+    // ✅ Load events
+    loadUpcomingEvents();
+    loadAllEvents();
+    loadPastEvents();
+
+  } catch (err) {
+    console.error('Init error:', err);
+    window.location.href = 'student-login.html';
   }
+});
 
-  if (!currentUser || currentUser.role !== "admin"){
-    window.location.href = 'admin-login.html';
+
+// Load upcoming events from backend
+function loadUpcomingEvents() {
+  const eventContainer = document.getElementById('upcoming-events');
+  
+  fetch("/api/users/events-dashboard")
+    .then(response => response.json())
+    .then(data => {
+      console.log("Upcoming events data:", data);
+      displayUpcomingEvents(data.events);
+    })
+    .catch(error => {
+      console.error("Error loading upcoming events:", error);
+      if (eventContainer) {
+        eventContainer.innerHTML = '<p class="text-danger">Failed to load events</p>';
+      }
+    });
+}
+
+// Display upcoming events in the container
+function displayUpcomingEvents(events) {
+  const eventContainer = document.getElementById('upcoming-events');
+  
+  if (!eventContainer) return;
+  
+  if (!events || events.length === 0) {
+    eventContainer.innerHTML = '<p class="text-muted text-center">No upcoming events available</p>';
     return;
   }
+  
+  let html = '<div class="row g-3">';
+  
+  events.forEach(event => {
+    const eventId = event._id || event.event_id;
+    html += `
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 event-card" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);">
+          <div class="card-body">
+            <h6 class="card-title">${escapeHtml(event.title || event.name || 'Event')}</h6>
+            <p class="card-text small text-muted">${escapeHtml(event.description || '')}</p>
+            <div class="small mt-2">
+              <p class="mb-1"><strong>Date:</strong> ${formatDate(event.date)}</p>
+              <p class="mb-1"><strong>Venue:</strong> ${escapeHtml(event.venue || event.location || 'TBD')}</p>
+              <p class="mb-1"><strong>Status:</strong> <span class="badge bg-success">${escapeHtml(event.status || 'upcoming')}</span></p>
+            </div>
+            <button class="btn btn-sm btn-custom mt-3 w-100 register-event-btn" data-event-id="${eventId}">Register</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  eventContainer.innerHTML = html;
+}
 
-  const userNameEl = document.getElementById('user-name');
-  if (userNameEl) userNameEl.textContent = currentUser.name || 'Admin';
+// Load all events from backend
+function loadAllEvents() {
+  const eventContainer = document.getElementById('all-events');
+  
+  fetch("/api/users/all_events")
+    .then(response => response.json())
+    .then(data => {
+      console.log("All events data:", data);
+      displayAllEvents(data.events);
+    })
+    .catch(error => {
+      console.error("Error loading all events:", error);
+      if (eventContainer) {
+        eventContainer.innerHTML = '<p class="text-danger">Failed to load events</p>';
+      }
+    });
+}
 
-  setupSearchUI();
-  showSection(null, 'dashboard');
+// Display all events in the container
+function displayAllEvents(events) {
+  const eventContainer = document.getElementById('all-events');
+  
+  if (!eventContainer) return;
+  
+  if (!events || events.length === 0) {
+    eventContainer.innerHTML = '<p class="text-muted text-center">No events available</p>';
+    return;
+  }
+  
+  let html = '<div class="row g-3">';
+  
+  events.forEach(event => {
+    const eventId = event._id || event.event_id;
+    html += `
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 event-card" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);">
+          <div class="card-body">
+            <h6 class="card-title">${escapeHtml(event.title || event.name || 'Event')}</h6>
+            <p class="card-text small text-muted">${escapeHtml(event.description || '')}</p>
+            <div class="small mt-2">
+              <p class="mb-1"><strong>Date:</strong> ${formatDate(event.date)}</p>
+              <p class="mb-1"><strong>Venue:</strong> ${escapeHtml(event.venue || event.location || 'TBD')}</p>
+              <p class="mb-1"><strong>Status:</strong> <span class="badge bg-success">${escapeHtml(event.status || 'upcoming')}</span></p>
+            </div>
+            <button class="btn btn-sm btn-custom mt-3 w-100 register-btn" data-event-id="${eventId}">Register</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  eventContainer.innerHTML = html;
+  
+  // Add event listeners to register buttons
+  document.querySelectorAll('.register-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      registerForEvent(this.getAttribute('data-event-id'));
+    });
+  });
+}
+
+// Load past/registered events from backend
+function loadPastEvents() {
+  const eventContainer = document.getElementById('my-events');
+  
+  fetch("/api/users/events-past")
+    .then(response => response.json())
+    .then(data => {
+      console.log("Past events data:", data);
+      displayPastEvents(data.events);
+    })
+    .catch(error => {
+      console.error("Error loading past events:", error);
+      if (eventContainer) {
+        eventContainer.innerHTML = '<p class="text-danger">Failed to load events</p>';
+      }
+    });
+}
+
+// Display past/registered events in the container
+function displayPastEvents(events) {
+  const eventContainer = document.getElementById('my-events');
+  
+  if (!eventContainer) return;
+  
+  if (!events || events.length === 0) {
+    eventContainer.innerHTML = '<p class="text-muted text-center">No registered events or history</p>';
+    return;
+  }
+  
+  let html = '<div class="row g-3">';
+  
+  events.forEach(event => {
+    html += `
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 event-card" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);">
+          <div class="card-body">
+            <h6 class="card-title">${escapeHtml(event.name || 'Event')}</h6>
+            <p class="card-text small text-muted">${escapeHtml(event.description || '')}</p>
+            <div class="small mt-2">
+              <p class="mb-1"><strong>Date:</strong> ${formatDate(event.date)}</p>
+              <p class="mb-1"><strong>Location:</strong> ${escapeHtml(event.location || 'TBD')}</p>
+              <p class="mb-1"><strong>Status:</strong> <span class="badge bg-secondary">${escapeHtml(event.status || 'past')}</span></p>
+            </div>
+            <button class="btn btn-sm btn-outline-light mt-3 w-100">View Details</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  eventContainer.innerHTML = html;
+}
+
+
+
+// Register for event function
+async function registerForEvent(eventId) {
+  try {
+    // Get user from localStorage
+    const userStr = localStorage.getItem('user');
+    if (!userStr) {
+      alert('  Session expired. Please login again.');
+      window.location.href = 'student-login.html';
+      return;
+    }
+    
+    const user = JSON.parse(userStr);
+    
+    // Validate user data
+    if (!user.user_id) {
+      alert('  User ID not found. Please login again.');
+      window.location.href = 'student-login.html';
+      return;
+    }
+    
+    // Validate event ID
+    if (!eventId || eventId.trim() === '') {
+      alert(' Event ID is missing. Please refresh the page and try again.');
+      return;
+    }
+    
+    console.log('Registering user:', user.user_id, 'for event:', eventId);
+    
+    // Make the registration request
+    const response = await fetch('/api/users/register-event', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        user_id: user.user_id,
+        event_id: eventId
+      })
+    });
+    
+    // Parse response
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      console.error('Failed to parse response:', e);
+      alert('Server error. Please try again.');
+      return;
+    }
+    
+    // Handle response
+    if (response.ok) {
+      alert('Registration successful! You have registered for this event.');
+      // Reload events after successful registration
+      setTimeout(() => {
+        loadUpcomingEvents();
+        loadAllEvents();
+        loadPastEvents();
+      }, 500);
+    } else {
+      const errorMsg = data.detail || data.message || 'Registration failed';
+      console.error('Registration error:', errorMsg);
+      alert('' + errorMsg);
+    }
+  } catch (error) {
+    console.error('Registration error:', error);
+    alert('Error during registration: ' + (error.message || 'Unknown error'));
+  }
+}
+
+// Event delegation for register buttons
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.classList.contains('register-event-btn')) {
+    const eventId = e.target.getAttribute('data-event-id');
+    if (eventId) {
+      registerForEvent(eventId);
+    } else {
+      alert(' Event ID not found. Please refresh the page.');
+    }
+  }
 });
-</script>
 
+
+</script>
 </body>
 </html>

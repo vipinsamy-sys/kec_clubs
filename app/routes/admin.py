@@ -6,7 +6,7 @@ router = APIRouter()
 db = get_db()
 
 
-@router.post("/admin-login")
+"""@router.post("/admin-login")
 def login_admin(admin: admin_loginData):
     admins_collection = db['admins']
     db_admin = admins_collection.find_one({"email": admin.email})
@@ -27,3 +27,4 @@ def login_admin(admin: admin_loginData):
         }
     }
 
+"""

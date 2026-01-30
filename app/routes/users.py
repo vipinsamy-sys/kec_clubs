@@ -22,14 +22,24 @@ def register_user(user: UserRegister):
 @router.post("/student-login")
 def login_user(user: User_loginData):
     users_collection = db['users']
+    print("LOGIN ATTEMPT:", user.email)
+
     db_user = users_collection.find_one({"email": user.email})
+    print("DB USER:", db_user)
 
     if not db_user:
         raise HTTPException(status_code=400, detail="User not found")
+    print("DB PASSWORD:", db_user["password"])
+    print("INPUT PASSWORD:", user.password)
+
 
     # Compare password
     if db_user["password"] != user.password:
         raise HTTPException(status_code=400, detail="Invalid password")
+    
+    # Get is_admin field (default to False if not present)
+    is_admin = bool(db_user.get("is_admin", False))
+
     
     return {
         "message": "User logged in successfully",
@@ -37,8 +47,8 @@ def login_user(user: User_loginData):
             "user_id": str(db_user["_id"]),
             "name": db_user["name"],
             "email": db_user["email"],
-            "user_roll": db_user["user_roll"],
-            "role": "student"
+            
+            "is_admin": is_admin
         }
     }
 

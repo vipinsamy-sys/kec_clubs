@@ -90,23 +90,6 @@ def get_event_participants(event_id: str):
     }
     
 
-@router.post("/manage_admins")
-def manage_admins(action: str, email: str):
-    fac_collection = db['faculty']
-    user = fac_collection.find_one({"email": email})
-
-    if not user:
-        raise HTTPException(status_code=404, detail="Faculty member not found")
-
-    if action == "promote":
-        fac_collection.update_one({"email": email}, {"$set": {"role": "admin"}})
-        return {"message": f"{email} has been promoted to admin."}
-    elif action == "demote":
-        fac_collection.update_one({"email": email}, {"$set": {"role": "faculty"}})
-        return {"message": f"{email} has been demoted to faculty."}
-    else:
-        raise HTTPException(status_code=400, detail="Invalid action. Use 'promote' or 'demote'.")
-    
 @router.get("/filter-participants")
 def filter_participants(
     club: str = None,
@@ -236,10 +219,26 @@ def promote_student_to_admin(promotion_data: PromotionData):
     
     result = admin_collection.insert_one(admin_record)
     
+    # Update student document to set is_admin: true
+    users_collection.update_one(
+        {"_id": ObjectId(student_id)},
+        {"$set": {"is_admin": True}}
+    )
+    
     return {
-        "message": f"{student_name} has been promoted to admin for {club_name}",
-        "admin_id": str(result.inserted_id)
+    "message": f"{student_name} promoted to admin successfully",
+    "user": {
+        "name": student["name"],
+        "email": student["email"],
+        "studentId": str(student["_id"]),
+        "clubId": club_id,
+        "clubName": club_name,
+        "is_admin": True
     }
+}
+
+
+
 
 @router.get("/get-admins")
 def get_all_admins():

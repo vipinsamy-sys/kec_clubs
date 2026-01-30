@@ -453,9 +453,40 @@
       .btn-custom { width: 100%; }
       .mobile-only-hidden { display: none !important; }
     }
+
+
+    .portal-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.8);
+  font-weight: 700;
+  font-size: 15px;
+  margin-right: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  transition: 0.2s;
+}
+
+.portal-btn:hover {
+  color: white;
+  background: rgba(255,255,255,0.08);
+}
+
+.portal-btn.active {
+  background: linear-gradient(90deg, rgba(110,231,183,0.2), rgba(139,92,246,0.2));
+  color: white;
+}
+
   </style>
 </head>
 <body>
+<nav class="top-navbar">
+ <div class="top-nav-right">
+    <button id="admin-portal-btn" class="clubs-btn portal-btn" onclick="switchPortal('admin')">
+      Clubs & Activities
+    </button>
+  </div>
+</nav>
   <!-- Mobile Overlay -->
   <div id="mobileOverlay" class="mobile-overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -1847,7 +1878,7 @@ async function loadStudentsForPromotion() {
 // Load all clubs for promotion dropdown
 async function loadClubsForPromotion() {
   try {
-    const response = await fetch('/api/clubs/all_clubs', {
+    const response = await fetch('/api/clubs', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
@@ -1856,13 +1887,12 @@ async function loadClubsForPromotion() {
     });
     
     if (response.ok) {
-      const data = await response.json();
-      const clubs = data.clubs || [];
+      const clubs = await response.json();
       const select = document.getElementById('club-name');
       if (select) {
         select.innerHTML = '<option value="">Choose a club...</option>' + 
           (Array.isArray(clubs) ? clubs : []).map(c => 
-            `<option value="${escapeAttr(c._id || c.id || c.name || '')}">${escapeHtml(c.name || 'Unknown Club')}</option>`
+            `<option value="${escapeAttr(c._id || c.id || '')}">${escapeHtml(c.name || 'Unknown Club')}</option>`
           ).join('');
       }
     } else {
