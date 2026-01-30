@@ -20,6 +20,4 @@ class User_loginData(BaseModel):
 class EventRegistration(BaseModel):
     user_id: str
     event_id: str
-
-
-
+   
