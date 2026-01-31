@@ -160,9 +160,10 @@ def get_event_participants_list(event_id: str):
     
     # Get user details for registered users
     participants = list(users_collection.find(
-        {"email": {"$in": registered_users}},
-        {"_id": 0, "password": 0}
-    ))
+    {"email": {"$in": registered_users}},
+    {"_id": 0, "password": 0}
+))
+
 
     return {
         "event_id": event_id,
@@ -173,69 +174,80 @@ def get_event_participants_list(event_id: str):
 
 @router.post("/promote-admin")
 def promote_student_to_admin(promotion_data: PromotionData):
-    """Promote a student to admin for a specific club"""
     from bson.objectid import ObjectId
     
     admin_collection = db["admin"]
     users_collection = db["users"]
     
     student_id = promotion_data.studentId
-    student_email = promotion_data.email
-    student_name = promotion_data.name
     club_id = promotion_data.clubId
-    club_name = promotion_data.clubName
-    
-    if not all([student_id, student_email, club_id]):
+
+    if not student_id or not club_id:
         raise HTTPException(status_code=400, detail="Missing required fields")
-    
-    # Check if student exists
-    try:
-        student = users_collection.find_one({"_id": ObjectId(student_id)})
-    except:
-        student = users_collection.find_one({"email": student_email})
-    
+
+    # Ensure student exists
+    student = users_collection.find_one({"_id": ObjectId(student_id)})
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
-    
-    # Check if already admin for this club
-    existing_admin = admin_collection.find_one({
+
+    # Prevent duplicate admin
+    if admin_collection.find_one({"studentId": student_id, "clubId": club_id}):
+        raise HTTPException(status_code=400, detail="Already admin for this club")
+
+    # Insert admin record
+    admin_collection.insert_one({
         "studentId": student_id,
-        "clubId": club_id
-    })
-    
-    if existing_admin:
-        raise HTTPException(status_code=400, detail="Student is already admin for this club")
-    
-    # Create admin record
-    admin_record = {
-        "studentId": student_id,
-        "email": student_email,
-        "name": student_name,
+        "email": student.get("email"),
+        "name": student.get("name"),
         "clubId": club_id,
-        "clubName": club_name,
+        "clubName": promotion_data.clubName,
         "role": "admin",
         "status": "active"
-    }
-    
-    result = admin_collection.insert_one(admin_record)
-    
-    # Update student document to set is_admin: true
+    })
+
+    # THIS IS THE REAL AUTH FLAG
     users_collection.update_one(
         {"_id": ObjectId(student_id)},
         {"$set": {"is_admin": True}}
     )
-    
+
     return {
-    "message": f"{student_name} promoted to admin successfully",
-    "user": {
-        "name": student["name"],
-        "email": student["email"],
-        "studentId": str(student["_id"]),
-        "clubId": club_id,
-        "clubName": club_name,
+        "message": "Student promoted to admin",
         "is_admin": True
     }
-}
+
+@router.post("/remove-admin")
+def remove_admin(admin_data: RemoveAdminData):
+    from bson.objectid import ObjectId
+
+    admin_collection = db["admin"]
+    users_collection = db["users"]
+
+    student_id = admin_data.studentId
+    club_id = admin_data.clubId
+
+    if not student_id or not club_id:
+        raise HTTPException(status_code=400, detail="Missing required fields")
+
+    # Remove admin record
+    result = admin_collection.delete_one({
+        "studentId": student_id,
+        "clubId": club_id
+    })
+
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Admin record not found")
+
+    #  VERY IMPORTANT
+    users_collection.update_one(
+        {"_id": ObjectId(student_id)},
+        {"$set": {"is_admin": False}}
+    )
+
+    return {
+        "message": "Admin removed successfully",
+        "is_admin": False
+    }
 
 
 
